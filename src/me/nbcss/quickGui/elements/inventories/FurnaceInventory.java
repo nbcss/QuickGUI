@@ -2,15 +2,15 @@ package me.nbcss.quickGui.elements.inventories;
 
 import me.nbcss.quickGui.elements.Icon;
 
-public class AnvilInventory extends AbstractInventory {
-	private static final String TYPE = "minecraft:anvil";
-	public AnvilInventory() {
-		super(TYPE, 3, 0);
+public class FurnaceInventory extends AbstractInventory {
+	private static final String TYPE = "minecraft:furnace";
+	public FurnaceInventory() {
+		super(TYPE, 3, 3);
 	}
 	public void setLeftInputIcon(Icon icon){
 		setIconElement(0, icon);
 	}
-	public void setRightInputIcon(Icon icon){
+	public void setFuelIcon(Icon icon){
 		setIconElement(1, icon);
 	}
 	public void setOutputIcon(Icon icon){
@@ -19,7 +19,7 @@ public class AnvilInventory extends AbstractInventory {
 	public Icon getLeftInputIcon(){
 		return getIconElement(0);
 	}
-	public Icon getRightInputIcon(){
+	public Icon getFuelInputIcon(){
 		return getIconElement(1);
 	}
 	public Icon getOutputIcon(){
