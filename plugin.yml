@@ -1,0 +1,5 @@
+name: QuickInterface
+main: me.nbcss.quickInterface.MainClass
+description: API
+version: 0.5
+depend: [ProtocolLib]
