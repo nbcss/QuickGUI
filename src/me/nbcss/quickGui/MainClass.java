@@ -30,15 +30,15 @@ public class MainClass extends JavaPlugin {
 				WrapperPlayClientWindowClick packet = new WrapperPlayClientWindowClick(event.getPacket());
 				if(packet.getWindowId() != -1)
 					return;
-				event.setCancelled(true);
 				Player player = event.getPlayer();
 				AbstractInventory inv = Operator.getOpenedInventory(player);
+				event.setCancelled(true);
 				Util.getWindowItemPacket(inv, player).sendPacket(player);
 				player.setItemOnCursor(null);
 				if(packet.getSlot() >= inv.getSlot() || packet.getSlot() < 0)
 					return;
 				ItemStack item = packet.getClickedItem();
-				ClickIconEvent e = new ClickIconEvent(event.getPlayer(), ClickIconAction.LEFT_CLICK, packet.getSlot(), item);
+				ClickIconEvent e = new ClickIconEvent(event.getPlayer(), ClickIconAction.fromInventoryAction(packet.getButton(), packet.getShift()), packet.getSlot(), item);
 				inv.onClick(e);
 			}
 

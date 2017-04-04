@@ -85,6 +85,7 @@ public class WrapperPlayClientWindowClick extends AbstractPacket {
 	 * 
 	 * @return The current Action number
 	 */
+	
 	public short getActionNumber() {
 		return handle.getShorts().read(0);
 	}
