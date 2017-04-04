@@ -7,7 +7,7 @@ public class FurnaceInventory extends AbstractInventory {
 	public FurnaceInventory() {
 		super(TYPE, 3, 3);
 	}
-	public void setLeftInputIcon(Icon icon){
+	public void setIngredientIcon(Icon icon){
 		setIconElement(0, icon);
 	}
 	public void setFuelIcon(Icon icon){
@@ -16,7 +16,7 @@ public class FurnaceInventory extends AbstractInventory {
 	public void setOutputIcon(Icon icon){
 		setIconElement(2, icon);
 	}
-	public Icon getLeftInputIcon(){
+	public Icon getIngredientIcon(){
 		return getIconElement(0);
 	}
 	public Icon getFuelInputIcon(){
