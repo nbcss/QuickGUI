@@ -1,2 +1,2 @@
 # QuickGUI
-用于编写库存GUI的API
+Spigot 1.10.2用于编写库存GUI的API
