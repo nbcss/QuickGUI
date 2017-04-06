@@ -1,56 +1,49 @@
 package me.nbcss.quickGui;
 
+import java.lang.reflect.Field;
+
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
 
-import me.nbcss.quickGui.elements.ClickIconAction;
-import me.nbcss.quickGui.elements.ClickIconEvent;
-import me.nbcss.quickGui.elements.inventories.AbstractInventory;
-import me.nbcss.quickGui.utils.Util;
-import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick;
+import me.nbcss.quickGui.elements.GlowEnchant;
 
 public class MainClass extends JavaPlugin {
+	private static final int ID = 101;
 	private static JavaPlugin plugin;
 	@Override
 	public void onEnable(){
 		plugin = this;
 		getServer().getPluginManager().registerEvents(new EventListener(), this);
-		ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this, ListenerPriority.NORMAL, PacketType.Play.Server.WINDOW_ITEMS, PacketType.Play.Client.WINDOW_CLICK){
-			@Override
-			public void onPacketReceiving(PacketEvent event) {
-				if(event.getPacketType() != PacketType.Play.Client.WINDOW_CLICK)
-					return;
-				WrapperPlayClientWindowClick packet = new WrapperPlayClientWindowClick(event.getPacket());
-				if(packet.getWindowId() != -1)
-					return;
-				Player player = event.getPlayer();
-				AbstractInventory inv = Operator.getOpenedInventory(player);
-				event.setCancelled(true);
-				Util.getWindowItemPacket(inv, player).sendPacket(player);
-				player.setItemOnCursor(null);
-				if(packet.getSlot() >= inv.getSlot() || packet.getSlot() < 0)
-					return;
-				ItemStack item = packet.getClickedItem();
-				ClickIconEvent e = new ClickIconEvent(event.getPlayer(), ClickIconAction.fromInventoryAction(packet.getButton(), packet.getShift()), packet.getSlot(), item);
-				inv.onClick(e);
-			}
-
-			@Override
-			public void onPacketSending(PacketEvent event) {
-				
-			}
-		});
-		//Demo.enable();
+		registerGlow();
+		for(Player player : getServer().getOnlinePlayers())
+			Operator.resetOpenedInventoryView(player);
+		ProtocolLibrary.getProtocolManager().addPacketListener(new PacketListener(this));
 	}
-	
+	public static int getID(){
+		return ID;
+	}
 	public static JavaPlugin getHandle(){
 		return plugin;
 	}
+	public void registerGlow() {
+        try {
+            Field f = Enchantment.class.getDeclaredField("acceptingNew");
+            f.setAccessible(true);
+            f.set(null, true);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            Enchantment.registerEnchantment(new GlowEnchant());
+        }
+        catch (IllegalArgumentException e){
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 }

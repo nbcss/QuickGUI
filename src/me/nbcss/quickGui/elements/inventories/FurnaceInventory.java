@@ -4,8 +4,9 @@ import me.nbcss.quickGui.elements.Icon;
 
 public class FurnaceInventory extends AbstractInventory {
 	private static final String TYPE = "minecraft:furnace";
+	private static final String NAME = "Furnace";
 	public FurnaceInventory() {
-		super(TYPE, 3, 3);
+		super(TYPE, 3, 3, NAME);
 	}
 	public void setIngredientIcon(Icon icon){
 		setIconElement(0, icon);

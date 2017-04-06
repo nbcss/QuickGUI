@@ -13,10 +13,10 @@ public final class EventListener implements Listener {
 	}
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e){
-		Operator.addOpenedInventory(e.getPlayer());
+		Operator.resetOpenedInventoryView(e.getPlayer());
 	}
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e){
-		Operator.removeOpenedInventory(e.getPlayer());
+		Operator.removeOpenedInventoryView(e.getPlayer());
 	}
 }

@@ -4,26 +4,73 @@ import java.util.HashMap;
 
 import org.bukkit.entity.Player;
 
+import me.nbcss.quickGui.elements.InventoryView;
 import me.nbcss.quickGui.elements.inventories.AbstractInventory;
-import me.nbcss.quickGui.utils.Util;
+import me.nbcss.quickGui.elements.inventories.BottomInventory;
+import me.nbcss.quickGui.elements.inventories.HotbarInventory;
+import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerCloseWindow;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerOpenWindow;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerWindowItems;
 public final class Operator {
-	private static HashMap<Player, AbstractInventory> players = new HashMap<Player, AbstractInventory>();
-	public static void openInventory(AbstractInventory inv, Player player){
-		WrapperPlayServerOpenWindow window = Util.getWindowPacket(inv);
+	private static HashMap<Player, InventoryView> map = new HashMap<Player, InventoryView>();
+	public static void openInventory(InventoryView view, Player player){
+		if(view == null)
+			return;
+		view.onOpenInventoryView(player);
+		WrapperPlayServerOpenWindow window = view.getOpenWindowPacket();
+		WrapperPlayServerWindowItems setup = view.getWindowItemsPacket();
 		window.sendPacket(player);
-		WrapperPlayServerWindowItems setup = Util.getWindowItemPacket(inv, player);
 		setup.sendPacket(player);
-		players.put(player, inv);
+		map.put(player, view);
 	}
-	protected static AbstractInventory getOpenedInventory(Player player){
-		return players.get(player);
+	public static void openInventory(AbstractInventory inv, Player player){
+		BottomInventory bottom = BottomInventory.createFromPlayer(player);
+		HotbarInventory hotbar = HotbarInventory.createFromPlayer(player);
+		InventoryView view = new InventoryView(inv, bottom, hotbar);
+		view.onOpenInventoryView(player);
+		WrapperPlayServerOpenWindow window = view.getOpenWindowPacket();
+		WrapperPlayServerWindowItems setup = view.getWindowItemsPacket();
+		window.sendPacket(player);
+		setup.sendPacket(player);
+		map.put(player, view);
 	}
-	protected static void removeOpenedInventory(Player player){
-		players.remove(player);
+	public static void openInventory(AbstractInventory inv, BottomInventory bottom, Player player){
+		if(bottom == null)
+			bottom = BottomInventory.createFromPlayer(player);
+		HotbarInventory hotbar = HotbarInventory.createFromPlayer(player);
+		InventoryView view = new InventoryView(inv, bottom, hotbar);
+		view.onOpenInventoryView(player);
+		WrapperPlayServerOpenWindow window = view.getOpenWindowPacket();
+		WrapperPlayServerWindowItems setup = view.getWindowItemsPacket();
+		window.sendPacket(player);
+		setup.sendPacket(player);
+		map.put(player, view);
 	}
-	protected static void addOpenedInventory(Player player){
-		players.put(player, null);
+	public static void openInventory(AbstractInventory inv, BottomInventory bottom, HotbarInventory hotbar, Player player){
+		if(bottom == null)
+			bottom = BottomInventory.createFromPlayer(player);
+		if(hotbar == null)
+			hotbar = HotbarInventory.createFromPlayer(player);
+		InventoryView view = new InventoryView(inv, bottom, hotbar);
+		view.onOpenInventoryView(player);
+		WrapperPlayServerOpenWindow window = view.getOpenWindowPacket();
+		WrapperPlayServerWindowItems setup = view.getWindowItemsPacket();
+		window.sendPacket(player);
+		setup.sendPacket(player);
+		map.put(player, view);
+	}
+	public static void closeInventory(Player player){
+		WrapperPlayServerCloseWindow packet = new WrapperPlayServerCloseWindow();
+		packet.setWindowId(MainClass.getID());
+		packet.sendPacket(player);
+	}
+	protected static InventoryView getOpenedInventoryView(Player player){
+		return map.get(player);
+	}
+	protected static void removeOpenedInventoryView(Player player){
+		map.remove(player);
+	}
+	protected static void resetOpenedInventoryView(Player player){
+		map.put(player, null);
 	}
 }

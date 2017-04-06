@@ -4,8 +4,9 @@ import me.nbcss.quickGui.elements.Icon;
 
 public class AnvilInventory extends AbstractInventory {
 	private static final String TYPE = "minecraft:anvil";
+	private static final String NAME = "Anvil";
 	public AnvilInventory() {
-		super(TYPE, 3, 0);
+		super(TYPE, 3, 0, NAME);
 	}
 	public void setLeftInputIcon(Icon icon){
 		setIconElement(0, icon);

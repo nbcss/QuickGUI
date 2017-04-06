@@ -1,44 +1,74 @@
 package me.nbcss.quickGui.elements.inventories;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.nbcss.quickGui.elements.ClickIconEvent;
+import me.nbcss.quickGui.MainClass;
 import me.nbcss.quickGui.elements.Icon;
+//import me.nbcss.quickGui.utils.Util;
+import me.nbcss.quickGui.events.ClickEvent;
+import me.nbcss.quickGui.events.CloseInventoryEvent;
+import me.nbcss.quickGui.events.OpenInventoryEvent;
+import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerSetSlot;
 
 public abstract class AbstractInventory implements Cloneable {
-	//private String title;
+	private List<Player> watchers;
+	private boolean locked;
+	private String title;
 	private Icon[] items;
 	private final String type;
 	private final int slot;
 	private final int numSlot;
-	protected AbstractInventory(String type, int slot, int numSlot){
+	protected AbstractInventory(String type, int slot, int numSlot, String name){
+		watchers = new ArrayList<Player>();
 		items = new Icon[slot];
 		this.type = type;
 		this.slot = slot;
 		this.numSlot = numSlot;
+		locked = true;
+		setTitle(name);
 	}
 	
-	protected final void setIconElement(int slot, Icon icon){
+	public final void setIconElement(int slot, Icon icon){
 		if(slot >= items.length || slot < 0)
 			return;
 		items[slot] = icon;
+		//for(Player watcher : watchers)
+		//	Util.getWrapperPlayServerSetSlotPacket(slot, icon.getItem()).sendPacket(watcher);
 	}
 	
-	protected final Icon getIconElement(int slot){
+	public final Icon getIconElement(int slot){
 		if(slot >= items.length || slot < 0)
 			return null;
 		return items[slot];
 	}
 	
-	public final int getSlot(){
+	public void joinWatcher(Player player){
+		watchers.add(player);
+	}
+	
+	public void leaveWatcher(Player player){
+		watchers.remove(player);
+	}
+	
+	public boolean isSlotEmpty(int slot){
+		if(slot < 0 || slot >= items.length)
+			return true;
+		return items[slot] == null;
+	}
+	
+	public int getSlot(){
 		return slot;
 	}
 	
-	public final String getType(){
+	public String getType(){
 		return type;
 	}
 	
-	public final ItemStack[] getItemList(){
+	public ItemStack[] getItemList(){
 		ItemStack[] list = new ItemStack[slot];
 		for(int i = 0; i < slot; i++)
 			if(items[i] != null)
@@ -47,7 +77,7 @@ public abstract class AbstractInventory implements Cloneable {
 	}
 	
 	@Override
-	public final AbstractInventory clone(){
+	public AbstractInventory clone(){
 		AbstractInventory inv = null;
 		try {
 			inv = (AbstractInventory) super.clone();
@@ -65,10 +95,45 @@ public abstract class AbstractInventory implements Cloneable {
 		return numSlot;
 	}
 	
-	public void onClick(ClickIconEvent e){
-		if(items[e.getSlot()] == null)
-			return;
-		Icon icon = items[e.getSlot()];
-		icon.onClick(e);
+	public boolean onClickIcon(ClickEvent event){
+		if(items[event.getSlot()] == null)
+			return false;
+		Icon icon = items[event.getSlot()];
+		icon.onClick(event);
+		return icon.isMovable();
+	}
+	
+	public WrapperPlayServerSetSlot[] getSlotPacketsArray(){
+		ArrayList<WrapperPlayServerSetSlot> array = new ArrayList<WrapperPlayServerSetSlot>();
+		for(int i = 0; i < slot; i++){
+			if(items[i] != null){
+				WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot();
+				packet.setSlot(i);
+				packet.setSlotData(items[i].getItem());
+				packet.setWindowId(MainClass.getID());
+				array.add(packet);
+			}
+		}
+		return array.toArray(new WrapperPlayServerSetSlot[array.size()]);
+	}
+	
+	public void onClose(CloseInventoryEvent event){}
+	
+	public void onOpen(OpenInventoryEvent event){}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public boolean isLocked() {
+		return locked;
+	}
+
+	public void setLocked(boolean lock) {
+		this.locked = lock;
 	}
 }
