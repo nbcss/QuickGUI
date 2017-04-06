@@ -13,7 +13,7 @@ import me.nbcss.quickGui.elements.InventoryView;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientCloseWindow;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerCloseWindow;
-import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerSetSlot;
+//import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerSetSlot;
 
 public class PacketListener extends PacketAdapter {
 	private static final PacketType[] TYPES = {PacketType.Play.Server.CLOSE_WINDOW, PacketType.Play.Client.CLOSE_WINDOW, 
@@ -73,12 +73,14 @@ public class PacketListener extends PacketAdapter {
 			player.getInventory().setStorageContents(player.getInventory().getStorageContents());
 			Operator.resetOpenedInventoryView(player);
 		}else if(event.getPacketType() == PacketType.Play.Server.SET_SLOT){
+			/*
 			WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot(event.getPacket());
 			String line = "";
 			line += " Slot: " + packet.getSlot();
 			line += " Item: " + packet.getSlotData().getType().name();
 			line += " Id: "   + packet.getWindowId();
 			System.out.println(line);
+			*/
 		}
 	}
 

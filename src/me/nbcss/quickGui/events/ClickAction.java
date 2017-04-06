@@ -4,8 +4,9 @@ import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick.Inven
 
 public enum ClickAction {
 	LEFT_CLICK, RIGHT_CLICK, MID_CLICK, SHIFT_LEFT_CLICK, SHIFT_RIGHT_CLICK, DOUBLE_CLICK, UNKNOWN, 
-	NUMBER_1, NUMBER_2, NUMBER_3, NUMBER_4, NUMBER_5, NUMBER_6, NUMBER_7, NUMBER_8, NUMBER_9;
-	public static ClickAction fromInventoryAction(int button, InventoryClickType mode){
+	NUMBER_1, NUMBER_2, NUMBER_3, NUMBER_4, NUMBER_5, NUMBER_6, NUMBER_7, NUMBER_8, NUMBER_9,
+	KEY_Q, CTRL_KEY_Q;
+	public static ClickAction fromInventoryAction(int button, InventoryClickType mode, int slot){
 		switch(mode){
 		case PICKUP:
 			if(button == 0)
@@ -42,6 +43,18 @@ public enum ClickAction {
 			}
 		case CLONE:
 			return MID_CLICK;
+		case THROW:
+			if(slot < 0){
+				if(button == 0)
+					return LEFT_CLICK;
+				else
+					return RIGHT_CLICK;
+			}else{
+				if(button == 0)
+					return KEY_Q;
+				else
+					return CTRL_KEY_Q;
+			}
 		case PICKUP_ALL:
 			return DOUBLE_CLICK;
 		default:

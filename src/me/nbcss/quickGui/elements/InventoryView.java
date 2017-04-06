@@ -2,6 +2,8 @@ package me.nbcss.quickGui.elements;
 
 import java.util.ArrayList;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -15,10 +17,13 @@ import me.nbcss.quickGui.elements.inventories.HotbarInventory;
 import me.nbcss.quickGui.events.ClickAction;
 import me.nbcss.quickGui.events.ClickEvent;
 import me.nbcss.quickGui.events.ClickType;
+import me.nbcss.quickGui.events.CloneClickEvent;
 import me.nbcss.quickGui.events.CloseInventoryEvent;
 import me.nbcss.quickGui.events.NormalClickEvent;
 import me.nbcss.quickGui.events.OpenInventoryEvent;
 import me.nbcss.quickGui.events.QuickMoveClickEvent;
+import me.nbcss.quickGui.events.SwapHotbarClickEvent;
+import me.nbcss.quickGui.events.ThrowClickEvent;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick.InventoryClickType;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerOpenWindow;
@@ -72,25 +77,27 @@ public class InventoryView {
 	}
 	public void onClickInventoryView(WrapperPlayClientWindowClick packet, Player player){
 		int viewSlot = packet.getSlot();
+		int key = packet.getButton();
 		InventoryClickType type = packet.getShift();
-		ClickAction action = ClickAction.fromInventoryAction(packet.getButton(), type);
 		int inventorySlot = getInventorySlot(viewSlot);
+		ClickAction action = ClickAction.fromInventoryAction(key, type, viewSlot);
 		AbstractInventory clickedInventory = getLocatedInventory(viewSlot);
-		if(inventorySlot < 0)
-			return;
-		Icon icon = clickedInventory.getIconElement(inventorySlot);
-		boolean cursorResult, clickedResult;
+		Icon icon = null;
+		if(clickedInventory != null && inventorySlot >= 0)
+			icon = clickedInventory.getIconElement(inventorySlot);
+		//boolean cursorResult, clickedResult;
 		switch(type){
 		case PICKUP:
+		{
 			if(cursor == null && icon == null)
-				return;
-			cursorResult = false;
+				break;
+			boolean cursorResult = false;
 			if(cursor != null){
 				ClickEvent event = new NormalClickEvent(player, action, ClickType.MOVE_OUT_CURSOR, inventorySlot, clickedInventory);
 				cursor.onClick(event);
 				cursorResult = event.isCancelled();
 			}
-			clickedResult = false;
+			boolean clickedResult = false;
 			if(icon != null){
 				ClickEvent event = new NormalClickEvent(player, action, ClickType.MOVE_INTO_CURSOR, inventorySlot, clickedInventory);
 				icon.onClick(event);
@@ -107,18 +114,22 @@ public class InventoryView {
 				cursor = icon;
 				clickedInventory.setIconElement(inventorySlot, replace);
 			}
+		}
 			break;
 		case QUICK_MOVE:
+		{
 			if(icon == null)
-				return;
-			clickedResult = false;
+				break;
+			boolean clickedResult = false;
 			ArrayList<Integer> slots = new ArrayList<Integer>();
 			int lastSlot = -1;
-			ClickEvent event = new QuickMoveClickEvent(player, action, ClickType.NONE, inventorySlot, clickedInventory);
-			icon.onClick(event);
-			clickedResult = event.isCancelled();
+			{
+				ClickEvent event = new QuickMoveClickEvent(player, action, ClickType.NONE, inventorySlot, clickedInventory);
+				icon.onClick(event);
+				clickedResult = event.isCancelled();
+			}
 			if(icon.isNull())
-				return;
+				break;
 			boolean changed = false;
 			boolean cancelled = false;
 			int count = icon.getAmount();
@@ -180,7 +191,7 @@ public class InventoryView {
 						}
 						if(hotbarInventory.getIconElement(i).isNull()){
 							lastSlot = topInventory.getSlot() + bottomInventory.getSlot() + i;
-							last = count; //****!!!!
+							last = count;
 							count = 0;
 							break;
 						}
@@ -197,7 +208,7 @@ public class InventoryView {
 						}
 						if(bottomInventory.getIconElement(i).isNull()){
 							lastSlot = topInventory.getSlot() + i;
-							last = count; //****!!!!
+							last = count;	//If the icon is empty, it will be replaced by the operation
 							count = 0;
 							break;
 						}
@@ -242,7 +253,7 @@ public class InventoryView {
 						}
 						if(bottomInventory.getIconElement(i).isNull()){
 							lastSlot = i;
-							last = count; //****!!!!
+							last = count;
 							count = 0;
 							break;
 						}
@@ -279,11 +290,128 @@ public class InventoryView {
 					clickedInventory.setIconElement(inventorySlot, null);
 				}
 			}
+		}
 			break;
 		case SWAP:
-			if(cursor == null){
-				
+		{
+			if(cursor != null)
+				break;
+			if(clickedInventory.equals(hotbarInventory) && inventorySlot == key)
+				break;
+			Icon swap = hotbarInventory.getIcon(key);
+			boolean swapResult = false;
+			if(icon != null){
+				ClickEvent event = new SwapHotbarClickEvent(player, action, ClickType.NONE, inventorySlot, clickedInventory);
+				icon.onClick(event);
+				swapResult = event.isCancelled();
 			}
+			boolean hotbarResult = false;
+			if(swap != null){
+				ClickEvent event = new SwapHotbarClickEvent(player, action, ClickType.NONE, inventorySlot, clickedInventory);
+				swap.onClick(event);
+				hotbarResult = event.isCancelled();
+			}
+			if(hotbarInventory.isLocked() || clickedInventory.isLocked() || swapResult || hotbarResult){
+				updateSlot(player, viewSlot);
+				updateSlot(player, topInventory.getSlot() + bottomInventory.getSlot() + key);
+			}else{
+				hotbarInventory.setIcon(key, icon);
+				clickedInventory.setIconElement(inventorySlot, swap);
+			}
+		}
+			break;
+		case CLONE:
+		{
+			if(cursor != null || icon == null)
+				break;
+			boolean clickedResult = false;
+			ClickEvent event = new CloneClickEvent(player, action, ClickType.MOVE_INTO_CURSOR, inventorySlot, clickedInventory);
+			icon.onClick(event);
+			clickedResult = event.isCancelled();
+			if(clickedResult || clickedInventory.isLocked()){
+				updateCursor(player);
+				updateSlot(player, viewSlot);
+			}else
+				cursor = icon;
+		}
+			break;
+		case THROW:
+		{
+			if(icon == null && cursor == null)
+				break;
+			if(cursor != null && clickedInventory == null){
+				ClickEvent event = new ThrowClickEvent(player, action, ClickType.MOVE_OUT_CURSOR, inventorySlot, clickedInventory);
+				cursor.onClick(event);
+				if(event.isCancelled()){
+					updateCursor(player);
+				}else{
+					Bukkit.getScheduler().runTask(MainClass.getHandle(), new Runnable() {
+			            @Override
+			            public void run() {
+			        		Item dropped = null;
+			        		if(action == ClickAction.LEFT_CLICK || cursor.getAmount() == 1){
+			        			dropped = player.getWorld().dropItem(player.getLocation(), cursor.getItem());
+			        			cursor = null;
+			        			dropped.setVelocity(player.getLocation().getDirection());
+			        		}else{
+			        			ItemStack item = cursor.getItem().clone();
+			        			item.setAmount(1);
+			        			dropped = player.getWorld().dropItem(player.getLocation(), item);
+			        			cursor.setAmount(cursor.getAmount() - 1);
+			        			dropped.setVelocity(player.getLocation().getDirection());
+			        		}
+			        		if(dropped != null){
+			        			dropped.setVelocity(player.getLocation().getDirection().multiply(0.9));
+			        			dropped.setPickupDelay(40);
+			        		}
+			            }
+			        });
+				}
+			}
+			if(icon != null && clickedInventory != null){
+				ClickEvent event = new ThrowClickEvent(player, action, ClickType.NONE, inventorySlot, clickedInventory);
+				icon.onClick(event);
+				if(event.isCancelled() || clickedInventory.isLocked()){
+					updateSlot(player, viewSlot);
+				}else{
+					if(!icon.isNull()){
+						Icon local = icon;
+						Bukkit.getScheduler().runTask(MainClass.getHandle(), new Runnable() {
+				            @Override
+				            public void run() {
+				        		Item dropped = null;
+				        		if(action == ClickAction.CTRL_KEY_Q || local.getAmount() == 1){
+				        			dropped = player.getWorld().dropItem(player.getLocation(), local.getItem());
+				        			clickedInventory.setIconElement(inventorySlot, null);
+				        			dropped.setVelocity(player.getLocation().getDirection());
+				        		}else{
+				        			ItemStack item = local.getItem().clone();
+				        			item.setAmount(1);
+				        			dropped = player.getWorld().dropItem(player.getLocation(), item);
+				        			local.setAmount(local.getAmount() - 1);
+				        			dropped.setVelocity(player.getLocation().getDirection());
+				        		}
+				        		if(dropped != null){
+				        			dropped.setVelocity(player.getLocation().getDirection().multiply(0.9));
+				        			dropped.setPickupDelay(40);
+				        		}
+				            }
+				        });
+					}
+				}
+			}
+		}
+			break;
+		case QUICK_CRAFT:
+		{
+			//Unfinished yet
+		}
+			break;
+		case PICKUP_ALL:
+		{
+			//Unfinished yet
+		}
+			break;
 		default:
 			break;
 		}
@@ -314,7 +442,9 @@ public class InventoryView {
 		return packet;
 	}
 	private AbstractInventory getLocatedInventory(int viewSlot){
-		if(viewSlot < topInventory.getSlot()){
+		if(viewSlot < 0){
+			return null;
+		}else if(viewSlot < topInventory.getSlot()){
 			return topInventory;
 		}else if(viewSlot < topInventory.getSlot() + bottomInventory.getSlot()){
 			return bottomInventory;
@@ -326,6 +456,8 @@ public class InventoryView {
 	}
 	private int getInventorySlot(int viewSlot){
 		AbstractInventory inv = getLocatedInventory(viewSlot);
+		if(inv == null)
+			return -1;
 		int slot = -1;
 		if(inv.equals(topInventory)){
 			slot = viewSlot;
