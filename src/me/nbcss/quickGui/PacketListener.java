@@ -11,13 +11,14 @@ import com.comphenix.protocol.events.PacketEvent;
 
 import me.nbcss.quickGui.elements.InventoryView;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientCloseWindow;
+//import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientCustomPayload;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerCloseWindow;
-//import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerSetSlot;
+//import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerWindowItems;
 
 public class PacketListener extends PacketAdapter {
 	private static final PacketType[] TYPES = {PacketType.Play.Server.CLOSE_WINDOW, PacketType.Play.Client.CLOSE_WINDOW, 
-			PacketType.Play.Client.WINDOW_CLICK, PacketType.Play.Server.SET_SLOT};
+			PacketType.Play.Client.WINDOW_CLICK};
 	public PacketListener(Plugin plugin) {
 		super(plugin, ListenerPriority.NORMAL, TYPES);
 	}
@@ -72,16 +73,6 @@ public class PacketListener extends PacketAdapter {
 			view.onCloseInventoryView(player);
 			player.getInventory().setStorageContents(player.getInventory().getStorageContents());
 			Operator.resetOpenedInventoryView(player);
-		}else if(event.getPacketType() == PacketType.Play.Server.SET_SLOT){
-			/*
-			WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot(event.getPacket());
-			String line = "";
-			line += " Slot: " + packet.getSlot();
-			line += " Item: " + packet.getSlotData().getType().name();
-			line += " Id: "   + packet.getWindowId();
-			System.out.println(line);
-			*/
 		}
 	}
-
 }

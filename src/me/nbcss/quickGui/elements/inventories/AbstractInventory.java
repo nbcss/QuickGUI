@@ -3,18 +3,18 @@ package me.nbcss.quickGui.elements.inventories;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.nbcss.quickGui.MainClass;
 import me.nbcss.quickGui.elements.Icon;
-//import me.nbcss.quickGui.utils.Util;
-import me.nbcss.quickGui.events.ClickEvent;
 import me.nbcss.quickGui.events.CloseInventoryEvent;
 import me.nbcss.quickGui.events.OpenInventoryEvent;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerSetSlot;
 
 public abstract class AbstractInventory implements Cloneable {
+	private static final ItemStack AIR = new ItemStack(Material.AIR);
 	private List<Player> watchers;
 	private boolean locked;
 	private String title;
@@ -31,6 +31,8 @@ public abstract class AbstractInventory implements Cloneable {
 		locked = true;
 		setTitle(name);
 	}
+	
+	public abstract boolean isLegalItemStack(int slot, ItemStack item);
 	
 	public final void setIconElement(int slot, Icon icon){
 		if(slot >= items.length || slot < 0)
@@ -73,6 +75,8 @@ public abstract class AbstractInventory implements Cloneable {
 		for(int i = 0; i < slot; i++)
 			if(items[i] != null)
 				list[i] = items[i].getItem();
+			else
+				list[i] = AIR;	
 		return list;
 	}
 	
@@ -93,14 +97,6 @@ public abstract class AbstractInventory implements Cloneable {
 
 	public int getNumSlot() {
 		return numSlot;
-	}
-	
-	public boolean onClickIcon(ClickEvent event){
-		if(items[event.getSlot()] == null)
-			return false;
-		Icon icon = items[event.getSlot()];
-		icon.onClick(event);
-		return icon.isMovable();
 	}
 	
 	public WrapperPlayServerSetSlot[] getSlotPacketsArray(){

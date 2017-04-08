@@ -16,7 +16,7 @@ public class MainClass extends JavaPlugin {
 	@Override
 	public void onEnable(){
 		plugin = this;
-		getServer().getPluginManager().registerEvents(new EventListener(), this);
+		getServer().getPluginManager().registerEvents(new SpigotEventListener(), this);
 		registerGlow();
 		for(Player player : getServer().getOnlinePlayers())
 			Operator.resetOpenedInventoryView(player);

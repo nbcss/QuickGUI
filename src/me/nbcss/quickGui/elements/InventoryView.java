@@ -2,8 +2,6 @@ package me.nbcss.quickGui.elements;
 
 import java.util.ArrayList;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,16 +12,10 @@ import me.nbcss.quickGui.elements.inventories.AbstractInventory;
 import me.nbcss.quickGui.elements.inventories.BottomInventory;
 import me.nbcss.quickGui.elements.inventories.CustomInventory;
 import me.nbcss.quickGui.elements.inventories.HotbarInventory;
-import me.nbcss.quickGui.events.ClickAction;
-import me.nbcss.quickGui.events.ClickEvent;
-import me.nbcss.quickGui.events.ClickType;
-import me.nbcss.quickGui.events.CloneClickEvent;
 import me.nbcss.quickGui.events.CloseInventoryEvent;
-import me.nbcss.quickGui.events.NormalClickEvent;
+import me.nbcss.quickGui.events.InteractAction;
+import me.nbcss.quickGui.events.InventoryInteractEvent;
 import me.nbcss.quickGui.events.OpenInventoryEvent;
-import me.nbcss.quickGui.events.QuickMoveClickEvent;
-import me.nbcss.quickGui.events.SwapHotbarClickEvent;
-import me.nbcss.quickGui.events.ThrowClickEvent;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick.InventoryClickType;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerOpenWindow;
@@ -80,341 +72,21 @@ public class InventoryView {
 		int key = packet.getButton();
 		InventoryClickType type = packet.getShift();
 		int inventorySlot = getInventorySlot(viewSlot);
-		ClickAction action = ClickAction.fromInventoryAction(key, type, viewSlot);
+		InteractAction action = InteractAction.fromInventoryAction(key, type, viewSlot);
 		AbstractInventory clickedInventory = getLocatedInventory(viewSlot);
 		Icon icon = null;
 		if(clickedInventory != null && inventorySlot >= 0)
 			icon = clickedInventory.getIconElement(inventorySlot);
-		//boolean cursorResult, clickedResult;
-		switch(type){
-		case PICKUP:
-		{
-			if(cursor == null && icon == null)
-				break;
-			boolean cursorResult = false;
-			if(cursor != null){
-				ClickEvent event = new NormalClickEvent(player, action, ClickType.MOVE_OUT_CURSOR, inventorySlot, clickedInventory);
-				cursor.onClick(event);
-				cursorResult = event.isCancelled();
-			}
-			boolean clickedResult = false;
-			if(icon != null){
-				ClickEvent event = new NormalClickEvent(player, action, ClickType.MOVE_INTO_CURSOR, inventorySlot, clickedInventory);
-				icon.onClick(event);
-				clickedResult = event.isCancelled();
-			}
-			if(cursorResult || clickedResult || clickedInventory.isLocked()){
-				updateCursor(player);
-				if(icon != null)
-					updateSlot(player, viewSlot);
-			}else{
-				Icon replace = null;
-				if(cursor != null)
-					replace = cursor;
-				cursor = icon;
-				clickedInventory.setIconElement(inventorySlot, replace);
-			}
+		if(cursor != null){
+			InventoryInteractEvent event = new InventoryInteractEvent(true, player, action, this, clickedInventory);
+			cursor.onInteract(event);
 		}
-			break;
-		case QUICK_MOVE:
-		{
-			if(icon == null)
-				break;
-			boolean clickedResult = false;
-			ArrayList<Integer> slots = new ArrayList<Integer>();
-			int lastSlot = -1;
-			{
-				ClickEvent event = new QuickMoveClickEvent(player, action, ClickType.NONE, inventorySlot, clickedInventory);
-				icon.onClick(event);
-				clickedResult = event.isCancelled();
-			}
-			if(icon.isNull())
-				break;
-			boolean changed = false;
-			boolean cancelled = false;
-			int count = icon.getAmount();
-			int max = icon.getItem().getMaxStackSize();
-			int last = 0;
-			if(clickedInventory.equals(topInventory)){
-				boolean bottom = false;
-				boolean hotbar = false;
-				for(int i = 8; i >= 0; i--){
-					if(count == 0)
-						break;
-					if(hotbarInventory.getIconElement(i) == null)
-						continue;
-					if(icon.getItem().isSimilar(hotbarInventory.getIconElement(i).getItem())){
-						ItemStack compare = hotbarInventory.getIconElement(i).getItem();
-						if(compare.getAmount() >= max)
-							continue;
-						hotbar = true;
-						count -= max - compare.getAmount();
-						if(count < 0){
-							last = -count;
-							lastSlot = topInventory.getSlot() + bottomInventory.getSlot() + i;
-							count = 0;
-							break;
-						}
-						slots.add(topInventory.getSlot() + bottomInventory.getSlot() + i);
-					}
-				}
-				for(int i = 26; i >= 0; i--){
-					if(count == 0)
-						break;
-					if(bottomInventory.getIconElement(i) == null)
-						continue;
-					if(icon.getItem().isSimilar(bottomInventory.getIconElement(i).getItem())){
-						ItemStack compare = bottomInventory.getIconElement(i).getItem();
-						if(compare.getAmount() >= max)
-							continue;
-						bottom = true;
-						count -= max - compare.getAmount();
-						if(count < 0){
-							last = -count;
-							lastSlot = topInventory.getSlot() + i;
-							count = 0;
-							break;
-						}
-						slots.add(topInventory.getSlot() + i);
-					}
-				}
-				if(count > 0){
-					for(int i = 8; i >= 0; i--){
-						if(count == 0)
-							break;
-						if(hotbarInventory.getIconElement(i) == null){
-							hotbar = true;
-							lastSlot = topInventory.getSlot() + bottomInventory.getSlot() + i;
-							last = count;
-							count = 0;
-							break;
-						}
-						if(hotbarInventory.getIconElement(i).isNull()){
-							lastSlot = topInventory.getSlot() + bottomInventory.getSlot() + i;
-							last = count;
-							count = 0;
-							break;
-						}
-					}
-					for(int i = 26; i >= 0; i--){
-						if(count == 0)
-							break;
-						if(bottomInventory.getIconElement(i) == null){
-							bottom = true;
-							lastSlot = topInventory.getSlot() + i;
-							last = count;
-							count = 0;
-							break;
-						}
-						if(bottomInventory.getIconElement(i).isNull()){
-							lastSlot = topInventory.getSlot() + i;
-							last = count;	//If the icon is empty, it will be replaced by the operation
-							count = 0;
-							break;
-						}
-					}
-				}
-				if(bottom || hotbar)
-					changed = true;
-				if(clickedResult || (hotbar && hotbarInventory.isLocked()) || (bottom && bottomInventory.isLocked()) || clickedInventory.isLocked())
-					cancelled = true;
-			}else{
-				boolean top = false;
-				for(int i = 0; i < topInventory.getSlot(); i++){
-					if(count == 0)
-						break;
-					if(topInventory.getIconElement(i) == null)
-						continue;
-					if(icon.getItem().isSimilar(topInventory.getIconElement(i).getItem())){
-						ItemStack compare = topInventory.getIconElement(i).getItem();
-						if(compare.getAmount() >= max)
-							continue;
-						top = true;
-						count -= max - compare.getAmount();
-						if(count <= 0){
-							last = -count;
-							lastSlot = i;
-							count = 0;
-							break;
-						}
-						slots.add(i);
-					}
-				}
-				if(count > 0){
-					for(int i = 0; i < topInventory.getSlot(); i++){
-						if(count == 0)
-							break;
-						if(topInventory.getIconElement(i) == null){
-							top = true;
-							lastSlot = i;
-							last = count;
-							count = 0;
-							break;
-						}
-						if(bottomInventory.getIconElement(i).isNull()){
-							lastSlot = i;
-							last = count;
-							count = 0;
-							break;
-						}
-					}
-				}
-				if(top)
-					changed = true;
-				if(clickedResult || clickedInventory.isLocked() || (top && bottomInventory.isLocked()))
-					cancelled = true;
-			}
-			if(changed){
-				if(cancelled){
-					updateSlot(player, viewSlot);
-					for(int i : slots)
-						updateSlot(player, i);
-					if(lastSlot >= 0)
-						updateSlot(player, lastSlot);
-				}else{
-					for(int i : slots)
-						getLocatedInventory(i).getIconElement(getInventorySlot(i)).setAmount(max);
-					if(lastSlot >= 0){
-						AbstractInventory inv = getLocatedInventory(lastSlot);
-						int slot = getInventorySlot(lastSlot);
-						Icon before = inv.getIconElement(slot);
-						if(before != null){
-							int amount = before.getAmount() + last;
-							before.setAmount(amount);
-						}else{
-							before = new Icon(icon.getItem());
-							before.setAmount(last);
-						}
-						inv.setIconElement(slot, before);
-					}
-					clickedInventory.setIconElement(inventorySlot, null);
-				}
-			}
+		if(icon != null){
+			InventoryInteractEvent event = new InventoryInteractEvent(false, player, action, this, clickedInventory);
+			icon.onInteract(event);
 		}
-			break;
-		case SWAP:
-		{
-			if(cursor != null)
-				break;
-			if(clickedInventory.equals(hotbarInventory) && inventorySlot == key)
-				break;
-			Icon swap = hotbarInventory.getIcon(key);
-			boolean swapResult = false;
-			if(icon != null){
-				ClickEvent event = new SwapHotbarClickEvent(player, action, ClickType.NONE, inventorySlot, clickedInventory);
-				icon.onClick(event);
-				swapResult = event.isCancelled();
-			}
-			boolean hotbarResult = false;
-			if(swap != null){
-				ClickEvent event = new SwapHotbarClickEvent(player, action, ClickType.NONE, inventorySlot, clickedInventory);
-				swap.onClick(event);
-				hotbarResult = event.isCancelled();
-			}
-			if(hotbarInventory.isLocked() || clickedInventory.isLocked() || swapResult || hotbarResult){
-				updateSlot(player, viewSlot);
-				updateSlot(player, topInventory.getSlot() + bottomInventory.getSlot() + key);
-			}else{
-				hotbarInventory.setIcon(key, icon);
-				clickedInventory.setIconElement(inventorySlot, swap);
-			}
-		}
-			break;
-		case CLONE:
-		{
-			if(cursor != null || icon == null)
-				break;
-			boolean clickedResult = false;
-			ClickEvent event = new CloneClickEvent(player, action, ClickType.MOVE_INTO_CURSOR, inventorySlot, clickedInventory);
-			icon.onClick(event);
-			clickedResult = event.isCancelled();
-			if(clickedResult || clickedInventory.isLocked()){
-				updateCursor(player);
-				updateSlot(player, viewSlot);
-			}else
-				cursor = icon;
-		}
-			break;
-		case THROW:
-		{
-			if(icon == null && cursor == null)
-				break;
-			if(cursor != null && clickedInventory == null){
-				ClickEvent event = new ThrowClickEvent(player, action, ClickType.MOVE_OUT_CURSOR, inventorySlot, clickedInventory);
-				cursor.onClick(event);
-				if(event.isCancelled()){
-					updateCursor(player);
-				}else{
-					Bukkit.getScheduler().runTask(MainClass.getHandle(), new Runnable() {
-			            @Override
-			            public void run() {
-			        		Item dropped = null;
-			        		if(action == ClickAction.LEFT_CLICK || cursor.getAmount() == 1){
-			        			dropped = player.getWorld().dropItem(player.getLocation(), cursor.getItem());
-			        			cursor = null;
-			        			dropped.setVelocity(player.getLocation().getDirection());
-			        		}else{
-			        			ItemStack item = cursor.getItem().clone();
-			        			item.setAmount(1);
-			        			dropped = player.getWorld().dropItem(player.getLocation(), item);
-			        			cursor.setAmount(cursor.getAmount() - 1);
-			        			dropped.setVelocity(player.getLocation().getDirection());
-			        		}
-			        		if(dropped != null){
-			        			dropped.setVelocity(player.getLocation().getDirection().multiply(0.9));
-			        			dropped.setPickupDelay(40);
-			        		}
-			            }
-			        });
-				}
-			}
-			if(icon != null && clickedInventory != null){
-				ClickEvent event = new ThrowClickEvent(player, action, ClickType.NONE, inventorySlot, clickedInventory);
-				icon.onClick(event);
-				if(event.isCancelled() || clickedInventory.isLocked()){
-					updateSlot(player, viewSlot);
-				}else{
-					if(!icon.isNull()){
-						Icon local = icon;
-						Bukkit.getScheduler().runTask(MainClass.getHandle(), new Runnable() {
-				            @Override
-				            public void run() {
-				        		Item dropped = null;
-				        		if(action == ClickAction.CTRL_KEY_Q || local.getAmount() == 1){
-				        			dropped = player.getWorld().dropItem(player.getLocation(), local.getItem());
-				        			clickedInventory.setIconElement(inventorySlot, null);
-				        			dropped.setVelocity(player.getLocation().getDirection());
-				        		}else{
-				        			ItemStack item = local.getItem().clone();
-				        			item.setAmount(1);
-				        			dropped = player.getWorld().dropItem(player.getLocation(), item);
-				        			local.setAmount(local.getAmount() - 1);
-				        			dropped.setVelocity(player.getLocation().getDirection());
-				        		}
-				        		if(dropped != null){
-				        			dropped.setVelocity(player.getLocation().getDirection().multiply(0.9));
-				        			dropped.setPickupDelay(40);
-				        		}
-				            }
-				        });
-					}
-				}
-			}
-		}
-			break;
-		case QUICK_CRAFT:
-		{
-			//Unfinished yet
-		}
-			break;
-		case PICKUP_ALL:
-		{
-			//Unfinished yet
-		}
-			break;
-		default:
-			break;
-		}
+		update(player);
+		updateCursor(player);
 	}
 	public WrapperPlayServerOpenWindow getOpenWindowPacket(){
 		WrapperPlayServerOpenWindow packet = new WrapperPlayServerOpenWindow();
@@ -430,16 +102,20 @@ public class InventoryView {
 		ItemStack[] inv = topInventory.getItemList();
 		ItemStack[] down = bottomInventory.getItemList();
 		ItemStack[] shortcut = hotbarInventory.getItemList();
-		ItemStack[] data = new ItemStack[inv.length + down.length + shortcut.length];
-		int index = 0;
+		ArrayList<ItemStack> data = new ArrayList<ItemStack>();
 		for(int i = 0; i < inv.length; i++)
-			data[index++] = inv[i];
+			data.add(inv[i]);
 		for(int i = 0; i < down.length; i++)
-			data[index++] = down[i];
+			data.add(down[i]);
 		for(int i = 0; i < shortcut.length; i++)
-			data[index++] = shortcut[i];
+			data.add(shortcut[i]);
 		packet.setSlotData(data);
 		return packet;
+	}
+	public void update(Player player){
+		int total = topInventory.getSlot() + 36;
+		for(int i = 0; i < total; i++)
+			updateSlot(player, i);
 	}
 	private AbstractInventory getLocatedInventory(int viewSlot){
 		if(viewSlot < 0){

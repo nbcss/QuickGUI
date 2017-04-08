@@ -42,4 +42,10 @@ public class BottomInventory extends AbstractInventory {
 			packet.setWindowId(-2);
 		return array;
 	}
+	@Override
+	public boolean isLegalItemStack(int slot, ItemStack item) {
+		if(slot < 0 || slot >= getSlot())
+			return false;
+		return true;
+	}
 }

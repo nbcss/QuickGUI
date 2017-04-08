@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class Util {
-	public static ItemStack createItem(int amount, short durability, Material material, String name, String[] lores) {
+	public static ItemStack createItem(int amount, short durability, Material material, String name, String... lores) {
 		ItemStack item = new ItemStack(material);
 		item.setAmount(amount);
 		item.setDurability(durability);

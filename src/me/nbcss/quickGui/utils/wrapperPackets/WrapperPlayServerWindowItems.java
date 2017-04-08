@@ -1,5 +1,7 @@
 package me.nbcss.quickGui.utils.wrapperPackets;
 
+import java.util.List;
+
 import org.bukkit.inventory.ItemStack;
 
 import com.comphenix.protocol.PacketType;
@@ -43,8 +45,8 @@ public class WrapperPlayServerWindowItems extends AbstractPacket {
 	 * 
 	 * @return The current Slot data
 	 */
-	public ItemStack[] getSlotData() {
-		return handle.getItemArrayModifier().read(0);
+	public List<ItemStack> getSlotData() {
+		return handle.getItemListModifier().read(0);
 	}
 
 	/**
@@ -52,8 +54,7 @@ public class WrapperPlayServerWindowItems extends AbstractPacket {
 	 * 
 	 * @param value - new value.
 	 */
-	public void setSlotData(ItemStack[] value) {
-		handle.getItemArrayModifier().write(0, value);
+	public void setSlotData(List<ItemStack> value) {
+		handle.getItemListModifier().write(0, value);
 	}
-
 }

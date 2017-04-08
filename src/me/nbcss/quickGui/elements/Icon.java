@@ -9,24 +9,20 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import me.nbcss.quickGui.events.ClickEvent;
+import me.nbcss.quickGui.events.InventoryInteractEvent;
 
 
 public class Icon {
 	private static final GlowEnchant GLOW = new GlowEnchant();
-	private boolean movable;
 	private ItemStack icon;
 	public Icon(){
 		icon = null;
-		setMovable(false);
 	}
 	public Icon(ItemStack item) {
 		icon = item;
-		setMovable(false);
 	}
 	public void setItem(ItemStack item){
 		icon = item;
-		setMovable(false);
 	}
 	public ItemStack getItem(){
 		return icon;
@@ -132,21 +128,5 @@ public class Icon {
 	public boolean isNull(){
 		return icon == null;
 	}
-	public boolean isMovable() {
-		return movable;
-	}
-	public void setMovable(boolean movable) {
-		this.movable = movable;
-	}
-	public void onClick(ClickEvent event){}
-	//call when move icon to cursor (mode 0, 3, 6)
-	public void onPickupIcon(){}
-	//call when move icon from cursor
-	public void onPutDownIcon(){}
-	//call when drag icon from cursor to slots (mode 5)
-	public void onDragIcon(){} 
-	//call when quick move icon to another inventory (shift) (mode 1)
-	public void onQuickMoveIcon(){}
-	//call when icon swap with hotbar icon (mode 2)
-	public void onSwapWithHotbar(){}
+	public void onInteract(InventoryInteractEvent event){}
 }

@@ -64,7 +64,10 @@ public final class Operator {
 		packet.setWindowId(MainClass.getID());
 		packet.sendPacket(player);
 	}
-	protected static InventoryView getOpenedInventoryView(Player player){
+	public static int getWindowID(){
+		return MainClass.getID();
+	}
+	public static InventoryView getOpenedInventoryView(Player player){
 		return map.get(player);
 	}
 	protected static void removeOpenedInventoryView(Player player){
