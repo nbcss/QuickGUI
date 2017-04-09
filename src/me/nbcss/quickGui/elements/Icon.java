@@ -12,20 +12,36 @@ import org.bukkit.inventory.meta.ItemMeta;
 import me.nbcss.quickGui.events.InventoryInteractEvent;
 
 
-public class Icon {
+public class Icon implements Interactable{
 	private static final GlowEnchant GLOW = new GlowEnchant();
+	private Interactable execute;
 	private ItemStack icon;
 	public Icon(){
 		icon = null;
 	}
 	public Icon(ItemStack item) {
 		icon = item;
+		execute = null;
+	}
+	public Icon(Interactable code) {
+		icon = null;
+		execute = code;
+	}
+	public Icon(ItemStack item, Interactable code) {
+		icon = item;
+		execute = code;
 	}
 	public void setItem(ItemStack item){
 		icon = item;
 	}
 	public ItemStack getItem(){
 		return icon;
+	}
+	public void setInteractCode(Interactable code){
+		execute = code;
+	}
+	public Interactable getInteractCode(){
+		return execute;
 	}
 	public void setName(String name){
 		if(!isNull()){
@@ -128,5 +144,9 @@ public class Icon {
 	public boolean isNull(){
 		return icon == null;
 	}
-	public void onInteract(InventoryInteractEvent event){}
+	@Override
+	public void onInteract(InventoryInteractEvent event){
+		if(execute != null)
+			execute.onInteract(event);
+	}
 }

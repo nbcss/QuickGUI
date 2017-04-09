@@ -12,6 +12,7 @@ import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerCloseWindow;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerOpenWindow;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerWindowItems;
 public final class Operator {
+	private static final int ID = 101;
 	private static HashMap<Player, InventoryView> map = new HashMap<Player, InventoryView>();
 	public static void openInventory(InventoryView view, Player player){
 		if(view == null)
@@ -61,11 +62,11 @@ public final class Operator {
 	}
 	public static void closeInventory(Player player){
 		WrapperPlayServerCloseWindow packet = new WrapperPlayServerCloseWindow();
-		packet.setWindowId(MainClass.getID());
+		packet.setWindowId(ID);
 		packet.sendPacket(player);
 	}
 	public static int getWindowID(){
-		return MainClass.getID();
+		return ID;
 	}
 	public static InventoryView getOpenedInventoryView(Player player){
 		return map.get(player);

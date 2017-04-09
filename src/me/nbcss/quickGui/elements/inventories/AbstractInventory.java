@@ -1,13 +1,13 @@
 package me.nbcss.quickGui.elements.inventories;
 
 import java.util.ArrayList;
-import java.util.List;
+//import java.util.List;
 
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
+//import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.nbcss.quickGui.MainClass;
+import me.nbcss.quickGui.Operator;
 import me.nbcss.quickGui.elements.Icon;
 import me.nbcss.quickGui.events.CloseInventoryEvent;
 import me.nbcss.quickGui.events.OpenInventoryEvent;
@@ -15,24 +15,20 @@ import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerSetSlot;
 
 public abstract class AbstractInventory implements Cloneable {
 	private static final ItemStack AIR = new ItemStack(Material.AIR);
-	private List<Player> watchers;
-	private boolean locked;
+	//private List<Player> watchers;
 	private String title;
 	private Icon[] items;
 	private final String type;
 	private final int slot;
 	private final int numSlot;
 	protected AbstractInventory(String type, int slot, int numSlot, String name){
-		watchers = new ArrayList<Player>();
+		//watchers = new ArrayList<Player>();
 		items = new Icon[slot];
 		this.type = type;
 		this.slot = slot;
 		this.numSlot = numSlot;
-		locked = true;
 		setTitle(name);
 	}
-	
-	public abstract boolean isLegalItemStack(int slot, ItemStack item);
 	
 	public final void setIconElement(int slot, Icon icon){
 		if(slot >= items.length || slot < 0)
@@ -47,7 +43,7 @@ public abstract class AbstractInventory implements Cloneable {
 			return null;
 		return items[slot];
 	}
-	
+	/*
 	public void joinWatcher(Player player){
 		watchers.add(player);
 	}
@@ -55,7 +51,7 @@ public abstract class AbstractInventory implements Cloneable {
 	public void leaveWatcher(Player player){
 		watchers.remove(player);
 	}
-	
+	*/
 	public boolean isSlotEmpty(int slot){
 		if(slot < 0 || slot >= items.length)
 			return true;
@@ -106,7 +102,7 @@ public abstract class AbstractInventory implements Cloneable {
 				WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot();
 				packet.setSlot(i);
 				packet.setSlotData(items[i].getItem());
-				packet.setWindowId(MainClass.getID());
+				packet.setWindowId(Operator.getWindowID());
 				array.add(packet);
 			}
 		}
@@ -123,13 +119,5 @@ public abstract class AbstractInventory implements Cloneable {
 
 	public void setTitle(String title) {
 		this.title = title;
-	}
-
-	public boolean isLocked() {
-		return locked;
-	}
-
-	public void setLocked(boolean lock) {
-		this.locked = lock;
 	}
 }

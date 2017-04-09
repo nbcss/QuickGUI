@@ -1,7 +1,5 @@
 package me.nbcss.quickGui.elements.inventories;
 
-import org.bukkit.inventory.ItemStack;
-
 import me.nbcss.quickGui.elements.Icon;
 
 public class CustomInventory extends AbstractInventory {
@@ -24,11 +22,5 @@ public class CustomInventory extends AbstractInventory {
 		if(slot < 0 || slot >= getSlot())
 			return null;
 		return super.getIconElement(slot);
-	}
-	@Override
-	public boolean isLegalItemStack(int slot, ItemStack item) {
-		if(slot < 0 || slot >= getSlot())
-			return false;
-		return true;
 	}
 }

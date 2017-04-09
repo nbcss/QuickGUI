@@ -1,7 +1,5 @@
 package me.nbcss.quickGui.elements.inventories;
 
-import org.bukkit.inventory.ItemStack;
-
 import me.nbcss.quickGui.elements.Icon;
 
 public class AnvilInventory extends AbstractInventory {
@@ -27,13 +25,5 @@ public class AnvilInventory extends AbstractInventory {
 	}
 	public Icon getOutputIcon(){
 		return getIconElement(2);
-	}
-	@Override
-	public boolean isLegalItemStack(int slot, ItemStack item) {
-		if(slot < 0 || slot >= getSlot())
-			return false;
-		if(slot == 2)
-			return false;
-		return true;
 	}
 }

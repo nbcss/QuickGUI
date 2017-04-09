@@ -11,7 +11,6 @@ import com.comphenix.protocol.ProtocolLibrary;
 import me.nbcss.quickGui.elements.GlowEnchant;
 
 public class MainClass extends JavaPlugin {
-	private static final int ID = 101;
 	private static JavaPlugin plugin;
 	@Override
 	public void onEnable(){
@@ -21,9 +20,6 @@ public class MainClass extends JavaPlugin {
 		for(Player player : getServer().getOnlinePlayers())
 			Operator.resetOpenedInventoryView(player);
 		ProtocolLibrary.getProtocolManager().addPacketListener(new PacketListener(this));
-	}
-	public static int getID(){
-		return ID;
 	}
 	public static JavaPlugin getHandle(){
 		return plugin;

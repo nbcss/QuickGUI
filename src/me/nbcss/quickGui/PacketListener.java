@@ -42,7 +42,7 @@ public class PacketListener extends PacketAdapter {
 	public void onPacketReceiving(PacketEvent event) {
 		if(event.getPacketType() == PacketType.Play.Client.WINDOW_CLICK){
 			WrapperPlayClientWindowClick packet = new WrapperPlayClientWindowClick(event.getPacket());
-			if(packet.getWindowId() != MainClass.getID())
+			if(packet.getWindowId() != Operator.getWindowID())
 				return;
 			event.setCancelled(true);
 			Player player = event.getPlayer();
@@ -51,7 +51,7 @@ public class PacketListener extends PacketAdapter {
 			
 		}else if(event.getPacketType() == PacketType.Play.Client.CLOSE_WINDOW){
 			WrapperPlayClientCloseWindow packet = new WrapperPlayClientCloseWindow(event.getPacket());
-			if(packet.getWindowId() != MainClass.getID())
+			if(packet.getWindowId() != Operator.getWindowID())
 				return;
 			event.setCancelled(true);
 			Player player = event.getPlayer();
@@ -66,7 +66,7 @@ public class PacketListener extends PacketAdapter {
 	public void onPacketSending(PacketEvent event) {
 		if(event.getPacketType() == PacketType.Play.Server.CLOSE_WINDOW){
 			WrapperPlayServerCloseWindow packet = new WrapperPlayServerCloseWindow(event.getPacket());
-			if(packet.getWindowId() != MainClass.getID())
+			if(packet.getWindowId() != Operator.getWindowID())
 				return;
 			Player player = event.getPlayer();
 			InventoryView view = Operator.getOpenedInventoryView(player);

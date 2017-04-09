@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 
-import me.nbcss.quickGui.MainClass;
+import me.nbcss.quickGui.Operator;
 import me.nbcss.quickGui.elements.inventories.AbstractInventory;
 import me.nbcss.quickGui.elements.inventories.BottomInventory;
 import me.nbcss.quickGui.elements.inventories.CustomInventory;
@@ -85,12 +85,12 @@ public class InventoryView {
 			InventoryInteractEvent event = new InventoryInteractEvent(false, player, action, this, clickedInventory);
 			icon.onInteract(event);
 		}
-		update(player);
+		updateContents(player);
 		updateCursor(player);
 	}
 	public WrapperPlayServerOpenWindow getOpenWindowPacket(){
 		WrapperPlayServerOpenWindow packet = new WrapperPlayServerOpenWindow();
-		packet.setWindowID(MainClass.getID());
+		packet.setWindowID(Operator.getWindowID());
 		packet.setInventoryType(topInventory.getType());
 		packet.setNumberOfSlots(topInventory.getNumSlot());
 		packet.setWindowTitle(WrappedChatComponent.fromText(topInventory.getTitle()));
@@ -98,7 +98,7 @@ public class InventoryView {
 	}
 	public WrapperPlayServerWindowItems getWindowItemsPacket(){
 		WrapperPlayServerWindowItems packet = new WrapperPlayServerWindowItems();
-		packet.setWindowId(MainClass.getID());
+		packet.setWindowId(Operator.getWindowID());
 		ItemStack[] inv = topInventory.getItemList();
 		ItemStack[] down = bottomInventory.getItemList();
 		ItemStack[] shortcut = hotbarInventory.getItemList();
@@ -112,7 +112,8 @@ public class InventoryView {
 		packet.setSlotData(data);
 		return packet;
 	}
-	public void update(Player player){
+	public void updateContents(Player player){
+		updateCursor(player);
 		int total = topInventory.getSlot() + 36;
 		for(int i = 0; i < total; i++)
 			updateSlot(player, i);
@@ -144,7 +145,9 @@ public class InventoryView {
 		}
 		return slot;
 	}
-	private void updateCursor(Player player){
+	public void updateCursor(Player player){
+		if(!Operator.getOpenedInventoryView(player).equals(this))
+			return;
 		WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot();
 		packet.setWindowId(-1);
 		packet.setSlot(-1);
@@ -154,7 +157,9 @@ public class InventoryView {
 		packet.setSlotData(item);
 		packet.sendPacket(player);
 	}
-	private void updateSlot(Player player, int viewSlot){
+	public void updateSlot(Player player, int viewSlot){
+		if(!Operator.getOpenedInventoryView(player).equals(this))
+			return;
 		WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot();
 		AbstractInventory inv = getLocatedInventory(viewSlot);
 		int slot = getInventorySlot(viewSlot);
@@ -166,7 +171,7 @@ public class InventoryView {
 			item = icon.getItem();
 		packet.setSlot(viewSlot);
 		packet.setSlotData(item);
-		packet.setWindowId(MainClass.getID());
+		packet.setWindowId(Operator.getWindowID());
 		packet.sendPacket(player);
 	}
 }
