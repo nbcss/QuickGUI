@@ -42,4 +42,11 @@ public class HotbarInventory extends AbstractInventory {
 			packet.setWindowId(-2);
 		return array;
 	}
+	@Override
+	public WrapperPlayServerSetSlot getSlotPacket(int slot){
+		WrapperPlayServerSetSlot packet = super.getSlotPacket(slot);
+		if(packet != null)
+			packet.setWindowId(-2);
+		return packet;
+	}
 }

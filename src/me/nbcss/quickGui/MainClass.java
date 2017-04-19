@@ -21,6 +21,11 @@ public class MainClass extends JavaPlugin {
 			Operator.resetOpenedInventoryView(player);
 		ProtocolLibrary.getProtocolManager().addPacketListener(new PacketListener(this));
 	}
+	@Override
+	public void onDisable(){
+		for(Player player : getServer().getOnlinePlayers())
+			Operator.closeInventory(player);
+	}
 	public static JavaPlugin getHandle(){
 		return plugin;
 	}

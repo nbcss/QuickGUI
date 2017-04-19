@@ -15,14 +15,12 @@ import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerSetSlot;
 
 public abstract class AbstractInventory implements Cloneable {
 	private static final ItemStack AIR = new ItemStack(Material.AIR);
-	//private List<Player> watchers;
 	private String title;
 	private Icon[] items;
 	private final String type;
 	private final int slot;
 	private final int numSlot;
 	protected AbstractInventory(String type, int slot, int numSlot, String name){
-		//watchers = new ArrayList<Player>();
 		items = new Icon[slot];
 		this.type = type;
 		this.slot = slot;
@@ -34,8 +32,6 @@ public abstract class AbstractInventory implements Cloneable {
 		if(slot >= items.length || slot < 0)
 			return;
 		items[slot] = icon;
-		//for(Player watcher : watchers)
-		//	Util.getWrapperPlayServerSetSlotPacket(slot, icon.getItem()).sendPacket(watcher);
 	}
 	
 	public final Icon getIconElement(int slot){
@@ -43,15 +39,6 @@ public abstract class AbstractInventory implements Cloneable {
 			return null;
 		return items[slot];
 	}
-	/*
-	public void joinWatcher(Player player){
-		watchers.add(player);
-	}
-	
-	public void leaveWatcher(Player player){
-		watchers.remove(player);
-	}
-	*/
 	public boolean isSlotEmpty(int slot){
 		if(slot < 0 || slot >= items.length)
 			return true;
@@ -98,15 +85,29 @@ public abstract class AbstractInventory implements Cloneable {
 	public WrapperPlayServerSetSlot[] getSlotPacketsArray(){
 		ArrayList<WrapperPlayServerSetSlot> array = new ArrayList<WrapperPlayServerSetSlot>();
 		for(int i = 0; i < slot; i++){
-			if(items[i] != null){
-				WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot();
-				packet.setSlot(i);
+			WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot();
+			packet.setSlot(i);
+			if(items[i] != null)
 				packet.setSlotData(items[i].getItem());
-				packet.setWindowId(Operator.getWindowID());
-				array.add(packet);
-			}
+			else
+				packet.setSlotData(AIR);
+			packet.setWindowId(Operator.getWindowID());
+			array.add(packet);
 		}
 		return array.toArray(new WrapperPlayServerSetSlot[array.size()]);
+	}
+	
+	public WrapperPlayServerSetSlot getSlotPacket(int slot){
+		if(slot < 0 || slot >= items.length)
+			return null;
+		WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot();
+		packet.setSlot(slot);
+		if(items[slot] != null)
+			packet.setSlotData(items[slot].getItem());
+		else
+			packet.setSlotData(AIR);
+		packet.setWindowId(Operator.getWindowID());
+		return packet;
 	}
 	
 	public void onClose(CloseInventoryEvent event){}

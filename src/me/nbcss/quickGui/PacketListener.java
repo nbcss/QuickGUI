@@ -56,7 +56,7 @@ public class PacketListener extends PacketAdapter {
 			event.setCancelled(true);
 			Player player = event.getPlayer();
 			InventoryView view = Operator.getOpenedInventoryView(player);
-			view.onCloseInventoryView(player);
+			view.closeInventoryView(player);
 			player.getInventory().setStorageContents(player.getInventory().getStorageContents());
 			Operator.resetOpenedInventoryView(player);
 		}
@@ -70,7 +70,9 @@ public class PacketListener extends PacketAdapter {
 				return;
 			Player player = event.getPlayer();
 			InventoryView view = Operator.getOpenedInventoryView(player);
-			view.onCloseInventoryView(player);
+			if(view == null)
+				return;
+			view.closeInventoryView(player);
 			player.getInventory().setStorageContents(player.getInventory().getStorageContents());
 			Operator.resetOpenedInventoryView(player);
 		}

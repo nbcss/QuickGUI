@@ -5,7 +5,7 @@ import me.nbcss.quickGui.elements.Icon;
 public class CustomInventory extends AbstractInventory {
 	private static final String TYPE = "minecraft:container";
 	private static final String NAME = "Container";
-	private CustomInventory(int slot) {
+	protected CustomInventory(int slot) {
 		super(TYPE, slot, slot, NAME);
 	}
 	public static CustomInventory constractCustomInventory(int row){

@@ -17,17 +17,21 @@ import me.nbcss.quickGui.events.InteractAction;
 import me.nbcss.quickGui.events.InventoryInteractEvent;
 import me.nbcss.quickGui.events.OpenInventoryEvent;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick;
+import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerCloseWindow;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick.InventoryClickType;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerOpenWindow;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerSetSlot;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerWindowItems;
 
 public class InventoryView {
-	private final AbstractInventory topInventory;
-	private final BottomInventory bottomInventory;
-	private final HotbarInventory hotbarInventory;
+	private ArrayList<Player> watchers;
+	private String title;
+	private AbstractInventory topInventory;
+	private BottomInventory bottomInventory;
+	private HotbarInventory hotbarInventory;
 	private Icon cursor;
 	public InventoryView(AbstractInventory inventory, BottomInventory bottom, HotbarInventory hotbar){
+		watchers = new ArrayList<Player>();
 		if(inventory == null)
 			inventory = CustomInventory.constractCustomInventory(0);
 		topInventory = inventory;
@@ -38,12 +42,26 @@ public class InventoryView {
 			hotbar = new HotbarInventory();
 		hotbarInventory = hotbar;
 		cursor = null;
+		title = topInventory.getTitle();
 	}
 	public Icon getCursor() {
 		return cursor;
 	}
 	public void setCursor(Icon cursor) {
 		this.cursor = cursor;
+	}
+	public void setTitle(String title){
+		this.title = title;
+		WrapperPlayServerOpenWindow packet = getOpenWindowPacket();
+		WrapperPlayServerSetSlot[] array = topInventory.getSlotPacketsArray();
+		for(Player watcher : watchers){
+			packet.sendPacket(watcher);
+			for(WrapperPlayServerSetSlot slot : array)
+				slot.sendPacket(watcher);
+		}
+	}
+	public String getTitle(){
+		return title;
 	}
 	public HotbarInventory getHotbarInventory() {
 		return hotbarInventory;
@@ -54,18 +72,67 @@ public class InventoryView {
 	public AbstractInventory getTopInventory() {
 		return topInventory;
 	}
+	public void setTopInventory(AbstractInventory inventory){
+		if(inventory == null)
+			return;
+		topInventory = inventory;
+		title = topInventory.getTitle();
+		WrapperPlayServerOpenWindow packet = getOpenWindowPacket();
+		WrapperPlayServerSetSlot[] array = topInventory.getSlotPacketsArray();
+		for(Player watcher : watchers){
+			packet.sendPacket(watcher);
+			for(WrapperPlayServerSetSlot slot : array)
+				slot.sendPacket(watcher);
+		}
+	}
+	public void setBottomInventory(BottomInventory inventory){
+		if(inventory == null)
+			return;
+		bottomInventory = inventory;
+		WrapperPlayServerSetSlot[] array = bottomInventory.getSlotPacketsArray();
+		for(Player watcher : watchers)
+			for(WrapperPlayServerSetSlot slot : array)
+				slot.sendPacket(watcher);
+	}
+	public void setHotbarInventory(HotbarInventory inventory){
+		if(inventory == null)
+			return;
+		hotbarInventory = inventory;
+		WrapperPlayServerSetSlot[] array = hotbarInventory.getSlotPacketsArray();
+		for(Player watcher : watchers)
+			for(WrapperPlayServerSetSlot slot : array)
+				slot.sendPacket(watcher);
+	}
+	public Player[] getWatchers(){
+		Player[] array = new Player[watchers.size()];
+		for(int i = 0; i < array.length; i++)
+			array[i] = watchers.get(i);
+		return array;
+	}
 	//==============================================*****
-	public void onOpenInventoryView(Player player){
+	public void openInventoryView(Player player){
 		OpenInventoryEvent e = new OpenInventoryEvent(player);
 		topInventory.onOpen(e);
 		bottomInventory.onOpen(e);
 		hotbarInventory.onOpen(e);
+		watchers.add(player);
+		WrapperPlayServerOpenWindow window = getOpenWindowPacket();
+		window.sendPacket(player);
+		WrapperPlayServerWindowItems setup = getWindowItemsPacket();
+		setup.sendPacket(player);
+		//open
 	}
-	public void onCloseInventoryView(Player player){
+	public void closeInventoryView(Player player){
+		if(!watchers.contains(player))
+			return;
 		CloseInventoryEvent e = new CloseInventoryEvent(player);
 		topInventory.onClose(e);
 		bottomInventory.onClose(e);
 		hotbarInventory.onClose(e);
+		watchers.remove(player);
+		WrapperPlayServerCloseWindow packet = new WrapperPlayServerCloseWindow();
+		packet.setWindowId(Operator.getWindowID());
+		packet.sendPacket(player);
 	}
 	public void onClickInventoryView(WrapperPlayClientWindowClick packet, Player player){
 		int viewSlot = packet.getSlot();
@@ -77,23 +144,28 @@ public class InventoryView {
 		Icon icon = null;
 		if(clickedInventory != null && inventorySlot >= 0)
 			icon = clickedInventory.getIconElement(inventorySlot);
+		boolean updateCursor = false, updateIcon = false;
 		if(cursor != null){
 			InventoryInteractEvent event = new InventoryInteractEvent(true, player, action, this, clickedInventory);
 			cursor.onInteract(event);
+			updateCursor = event.isUpdate();
 		}
 		if(icon != null){
 			InventoryInteractEvent event = new InventoryInteractEvent(false, player, action, this, clickedInventory);
 			icon.onInteract(event);
+			updateIcon = event.isUpdate();
 		}
-		updateContents(player);
-		updateCursor(player);
+		if(updateCursor || updateIcon){
+			updateContents(player);
+			//updateCursor(player);
+		}
 	}
 	public WrapperPlayServerOpenWindow getOpenWindowPacket(){
 		WrapperPlayServerOpenWindow packet = new WrapperPlayServerOpenWindow();
 		packet.setWindowID(Operator.getWindowID());
 		packet.setInventoryType(topInventory.getType());
 		packet.setNumberOfSlots(topInventory.getNumSlot());
-		packet.setWindowTitle(WrappedChatComponent.fromText(topInventory.getTitle()));
+		packet.setWindowTitle(WrappedChatComponent.fromText(title));
 		return packet;
 	}
 	public WrapperPlayServerWindowItems getWindowItemsPacket(){
@@ -113,10 +185,18 @@ public class InventoryView {
 		return packet;
 	}
 	public void updateContents(Player player){
+		if(!Operator.getOpenedInventoryView(player).equals(this))
+			return;
 		updateCursor(player);
-		int total = topInventory.getSlot() + 36;
-		for(int i = 0; i < total; i++)
-			updateSlot(player, i);
+		WrapperPlayServerSetSlot[] top = topInventory.getSlotPacketsArray();
+		WrapperPlayServerSetSlot[] bottom = bottomInventory.getSlotPacketsArray();
+		WrapperPlayServerSetSlot[] hotbar = hotbarInventory.getSlotPacketsArray();
+		for(WrapperPlayServerSetSlot packet : top)
+			packet.sendPacket(player);
+		for(WrapperPlayServerSetSlot packet : bottom)
+			packet.sendPacket(player);
+		for(WrapperPlayServerSetSlot packet : hotbar)
+			packet.sendPacket(player);
 	}
 	private AbstractInventory getLocatedInventory(int viewSlot){
 		if(viewSlot < 0){
@@ -160,18 +240,11 @@ public class InventoryView {
 	public void updateSlot(Player player, int viewSlot){
 		if(!Operator.getOpenedInventoryView(player).equals(this))
 			return;
-		WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot();
 		AbstractInventory inv = getLocatedInventory(viewSlot);
 		int slot = getInventorySlot(viewSlot);
 		if(slot < 0)
 			return;
-		ItemStack item = null;
-		Icon icon = inv.getIconElement(slot);
-		if(icon != null)
-			item = icon.getItem();
-		packet.setSlot(viewSlot);
-		packet.setSlotData(item);
-		packet.setWindowId(Operator.getWindowID());
+		WrapperPlayServerSetSlot packet = inv.getSlotPacket(slot);
 		packet.sendPacket(player);
 	}
 }

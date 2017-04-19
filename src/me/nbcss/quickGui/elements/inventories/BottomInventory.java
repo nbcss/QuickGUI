@@ -38,8 +38,19 @@ public class BottomInventory extends AbstractInventory {
 	@Override
 	public WrapperPlayServerSetSlot[] getSlotPacketsArray(){
 		WrapperPlayServerSetSlot[] array = super.getSlotPacketsArray();
-		for(WrapperPlayServerSetSlot packet : array)
+		for(WrapperPlayServerSetSlot packet : array){
 			packet.setWindowId(-2);
+			packet.setSlot(packet.getSlot() + 9);
+		}
 		return array;
+	}
+	@Override
+	public WrapperPlayServerSetSlot getSlotPacket(int slot){
+		WrapperPlayServerSetSlot packet = super.getSlotPacket(slot);
+		if(packet != null){
+			packet.setWindowId(-2);
+			packet.setSlot(packet.getSlot() + 9);
+		}
+		return packet;
 	}
 }
