@@ -4,13 +4,16 @@ import java.util.ArrayList;
 //import java.util.List;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
+//import org.bukkit.entity.Player;
 //import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.nbcss.quickGui.Operator;
 import me.nbcss.quickGui.elements.Icon;
-import me.nbcss.quickGui.events.CloseInventoryEvent;
-import me.nbcss.quickGui.events.OpenInventoryEvent;
+import me.nbcss.quickGui.events.InventoryChangeEvent;
+import me.nbcss.quickGui.events.InventoryCloseEvent;
+import me.nbcss.quickGui.events.InventoryOpenEvent;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerSetSlot;
 
 public abstract class AbstractInventory implements Cloneable {
@@ -110,9 +113,31 @@ public abstract class AbstractInventory implements Cloneable {
 		return packet;
 	}
 	
-	public void onClose(CloseInventoryEvent event){}
+	public void onClose(InventoryCloseEvent event){
+		
+	}
 	
-	public void onOpen(OpenInventoryEvent event){}
+	public void onOpen(InventoryOpenEvent event){
+		
+	}
+	
+	public void onChange(InventoryChangeEvent event){
+		
+	}
+	
+	public void update(Player receiver){
+		//System.out.println("update");
+		for(int i = 0; i < items.length; i++){
+			WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot();
+			packet.setSlot(i);
+			if(items[i] != null)
+				packet.setSlotData(items[i].getItem());
+			else
+				packet.setSlotData(AIR);
+			packet.setWindowId(Operator.getWindowID());
+			packet.sendPacket(receiver);
+		}
+	}
 
 	public String getTitle() {
 		return title;

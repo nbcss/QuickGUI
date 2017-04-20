@@ -13,12 +13,12 @@ public class InventoryInteractEvent {
 	private final InteractAction action;
 	private boolean update;
 	public InventoryInteractEvent(boolean cursor, Player player, InteractAction action, InventoryView view, AbstractInventory inv){
-		onCursor = cursor;
-		clickedView = view;
-		clickedInventory = inv;
+		this.onCursor = cursor;
+		this.clickedView = view;
+		this.clickedInventory = inv;
 		this.action = action;
 		this.player = player;
-		update = true;
+		this.update = true;
 	}
 	public boolean isOnCursor() {
 		return onCursor;

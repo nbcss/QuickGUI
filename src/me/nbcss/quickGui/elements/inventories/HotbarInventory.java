@@ -25,16 +25,6 @@ public class HotbarInventory extends AbstractInventory {
 		}
 		return inv;
 	}
-	public void setIcon(int slot, Icon item){
-		if(slot < 0 || slot >= getSlot())
-			return;
-		super.setIconElement(slot, item);
-	}
-	public Icon getIcon(int slot){
-		if(slot < 0 || slot >= getSlot())
-			return null;
-		return super.getIconElement(slot);
-	}
 	@Override
 	public WrapperPlayServerSetSlot[] getSlotPacketsArray(){
 		WrapperPlayServerSetSlot[] array = super.getSlotPacketsArray();
@@ -48,5 +38,13 @@ public class HotbarInventory extends AbstractInventory {
 		if(packet != null)
 			packet.setWindowId(-2);
 		return packet;
+	}
+	@Override
+	public void update(Player receiver){
+		WrapperPlayServerSetSlot[] array = super.getSlotPacketsArray();
+		for(WrapperPlayServerSetSlot packet : array){
+			packet.setWindowId(-2);
+			packet.sendPacket(receiver);
+		}
 	}
 }

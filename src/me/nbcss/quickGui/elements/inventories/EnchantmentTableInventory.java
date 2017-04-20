@@ -6,5 +6,5 @@ public class EnchantmentTableInventory extends AbstractInventory {
 	public EnchantmentTableInventory() {
 		super(TYPE, 2, 2, NAME);
 	}
-
+	
 }

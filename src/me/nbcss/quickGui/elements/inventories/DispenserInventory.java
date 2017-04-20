@@ -5,6 +5,5 @@ public class DispenserInventory extends AbstractInventory {
 	private static final String NAME = "Dispenser";
 	public DispenserInventory() {
 		super(TYPE, 9, 9, NAME);
-		
 	}
 }
