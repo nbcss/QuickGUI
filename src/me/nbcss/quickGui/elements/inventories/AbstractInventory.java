@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 //import org.bukkit.entity.Player;
-//import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.nbcss.quickGui.Operator;
 import me.nbcss.quickGui.elements.Icon;
+//import me.nbcss.quickGui.elements.InventoryView;
 import me.nbcss.quickGui.events.InventoryChangeEvent;
 import me.nbcss.quickGui.events.InventoryCloseEvent;
 import me.nbcss.quickGui.events.InventoryOpenEvent;
@@ -18,17 +18,19 @@ import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerSetSlot;
 
 public abstract class AbstractInventory implements Cloneable {
 	private static final ItemStack AIR = new ItemStack(Material.AIR);
+	//private ArrayList<InventoryView> views;
 	private String title;
 	private Icon[] items;
 	private final String type;
 	private final int slot;
 	private final int numSlot;
 	protected AbstractInventory(String type, int slot, int numSlot, String name){
+		//views = new ArrayList<InventoryView>();
 		items = new Icon[slot];
 		this.type = type;
 		this.slot = slot;
 		this.numSlot = numSlot;
-		setTitle(name);
+		this.title = name;
 	}
 	
 	public final void setIconElement(int slot, Icon icon){
@@ -126,7 +128,6 @@ public abstract class AbstractInventory implements Cloneable {
 	}
 	
 	public void update(Player receiver){
-		//System.out.println("update");
 		for(int i = 0; i < items.length; i++){
 			WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot();
 			packet.setSlot(i);

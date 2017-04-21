@@ -5,6 +5,8 @@ import org.bukkit.inventory.ItemStack;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import me.nbcss.quickGui.utils.Util;
+
 public class TradePage {
 	private ItemStack leftInputItem;
 	private ItemStack rightInputItem;
@@ -62,7 +64,11 @@ public class TradePage {
 		if(id != -1){
 			out.writeByte(leftInputItem.getAmount());
 			out.writeShort(leftInputItem.getDurability());
-			out.writeByte(0);
+			try {
+				out.write(Util.getItemStackByteArray(leftInputItem));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		if(outputItem != null)
 			id2 = outputItem.getTypeId();
@@ -70,7 +76,11 @@ public class TradePage {
 		if(id2 != -1){
 			out.writeByte(outputItem.getAmount());
 			out.writeShort(outputItem.getDurability());
-			out.writeByte(0);
+			try {
+				out.write(Util.getItemStackByteArray(outputItem));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		if(rightInputItem != null){
 			out.writeBoolean(true);
@@ -79,7 +89,11 @@ public class TradePage {
 			if(id3 != -1){
 				out.writeByte(rightInputItem.getAmount());
 				out.writeShort(rightInputItem.getDurability());
-				out.writeByte(0);
+				try {
+					out.write(Util.getItemStackByteArray(rightInputItem));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}else
 			out.writeBoolean(false);

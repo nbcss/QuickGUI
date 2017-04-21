@@ -8,10 +8,12 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
-//import com.google.common.io.ByteArrayDataInput;
-//import com.google.common.io.ByteStreams;
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
 
 import me.nbcss.quickGui.elements.InventoryView;
+import me.nbcss.quickGui.elements.inventories.VillagerTradeInventory;
+import me.nbcss.quickGui.events.TradeInventoryPageChangedEvent;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientCloseWindow;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientCustomPayload;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick;
@@ -37,7 +39,8 @@ public class PacketListener extends PacketAdapter {
 
 	@Override
 	public ListeningWhitelist getSendingWhitelist() {
-		return ListeningWhitelist.newBuilder(super.getSendingWhitelist()).types(PacketType.Play.Server.SET_SLOT, PacketType.Play.Server.WINDOW_DATA).build();
+		return ListeningWhitelist.newBuilder(super.getSendingWhitelist()).types(PacketType.Play.Server.SET_SLOT, PacketType.Play.Server.WINDOW_DATA, 
+				PacketType.Play.Server.CUSTOM_PAYLOAD).build();
 	}
 
 	@Override
@@ -63,8 +66,19 @@ public class PacketListener extends PacketAdapter {
 			Operator.resetOpenedInventoryView(player);
 		}else if(event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD){
 			WrapperPlayClientCustomPayload packet = new WrapperPlayClientCustomPayload(event.getPacket());
-			event.getPlayer().sendMessage(packet.getChannel());
-			
+			if(!packet.getChannel().equals("MC|TrSel"))
+				return;
+			InventoryView view = Operator.getOpenedInventoryView(event.getPlayer());
+			if(view == null)
+				return;
+			if(!(view.getTopInventory() instanceof VillagerTradeInventory))
+				return;
+			event.setCancelled(true);
+			VillagerTradeInventory inv = (VillagerTradeInventory) view.getTopInventory();
+			byte[] array = packet.getContents();
+			ByteArrayDataInput in = ByteStreams.newDataInput(array);
+			int page = in.readInt();
+			inv.onChangePage(new TradeInventoryPageChangedEvent(view, event.getPlayer(), page));
 		}
 	}
 
@@ -85,7 +99,8 @@ public class PacketListener extends PacketAdapter {
 			/*
 			WrapperPlayServerCustomPayload packet = new WrapperPlayServerCustomPayload(event.getPacket());
 			event.getPacket().getItemModifier();
-			event.getPlayer().sendMessage(packet.getChannel());
+			if(!packet.getChannel().equals("MC|TrList"))
+				return;
 			byte[] array = packet.getContents();
 			try{
 				event.getPlayer().sendMessage("length: " + array.length);
@@ -100,12 +115,24 @@ public class PacketListener extends PacketAdapter {
 					event.getPlayer().sendMessage("Item Id: " + in.readShort());
 					event.getPlayer().sendMessage("Count: " + in.readByte());
 					event.getPlayer().sendMessage("Damage: " + in.readShort());
-					event.getPlayer().sendMessage("NBT: " + in.readByte());
+					byte nbt = 0;
+					nbt = in.readByte();
+					event.getPlayer().sendMessage("NBT: " + nbt);
+					if(nbt != 0){
+						event.getPlayer().sendMessage("Special NBT format");
+						return;
+					}
 					event.getPlayer().sendMessage("Output Item Data");
 					event.getPlayer().sendMessage("Item Id: " + in.readShort());
 					event.getPlayer().sendMessage("Count: " + in.readByte());
 					event.getPlayer().sendMessage("Damage: " + in.readShort());
-					event.getPlayer().sendMessage("NBT: " + in.readByte());
+					nbt = in.readByte();
+					event.getPlayer().sendMessage("NBT: " + nbt);
+					if(nbt != 0){
+						for(int ir = 0; ir < 50; ir++)
+							event.getPlayer().sendMessage("Next Byte: " + in.readByte());
+						return;
+					}
 					boolean second = in.readBoolean();
 					event.getPlayer().sendMessage("Has second require: " + second);
 					if(second){
@@ -113,7 +140,12 @@ public class PacketListener extends PacketAdapter {
 						event.getPlayer().sendMessage("Item Id: " + in.readShort());
 						event.getPlayer().sendMessage("Count: " + in.readByte());
 						event.getPlayer().sendMessage("Damage: " + in.readShort());
-						event.getPlayer().sendMessage("NBT: " + in.readByte());
+						nbt = in.readByte();
+						event.getPlayer().sendMessage("NBT: " + nbt);
+						if(nbt != 0){
+							event.getPlayer().sendMessage("Special NBT format");
+							return;
+						}
 					}
 					event.getPlayer().sendMessage("Disabled: " + in.readBoolean());
 					event.getPlayer().sendMessage("Used Count: " + in.readInt());
@@ -131,9 +163,9 @@ public class PacketListener extends PacketAdapter {
 				//event.getPlayer().sendMessage("UTF: " + in.readUTF());
 			}catch(Exception e){
 				e.printStackTrace();
+			}finally {
+				packet.setContents(array);
 			}
-			
-			packet.setContents(array);
 			*/
 		}else if(event.getPacket().getType() == PacketType.Play.Server.OPEN_WINDOW){
 			

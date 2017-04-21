@@ -11,6 +11,7 @@ import me.nbcss.quickGui.Operator;
 import me.nbcss.quickGui.elements.TradePage;
 import me.nbcss.quickGui.events.InventoryChangeEvent;
 import me.nbcss.quickGui.events.InventoryOpenEvent;
+import me.nbcss.quickGui.events.TradeInventoryPageChangedEvent;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerCustomPayload;
 
 public class VillagerTradeInventory extends AbstractInventory {
@@ -38,6 +39,9 @@ public class VillagerTradeInventory extends AbstractInventory {
 		if(index < 0 || index >= list.size())
 			return null;
 		return list.get(index);
+	}
+	public void onChangePage(TradeInventoryPageChangedEvent event){
+		
 	}
 	@Override
 	public void onOpen(InventoryOpenEvent event){
