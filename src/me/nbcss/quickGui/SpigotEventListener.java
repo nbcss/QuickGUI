@@ -14,7 +14,7 @@ public final class SpigotEventListener implements Listener {
 	}
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e){
-		Operator.removeOpenedInventoryView(e.getPlayer());
+		Operator.closeInventory(e.getPlayer());
 	}
 	@EventHandler
 	public void onPlayerPickup(PlayerPickupItemEvent e){

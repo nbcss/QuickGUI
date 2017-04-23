@@ -17,12 +17,9 @@ public class HotbarInventory extends AbstractInventory {
 			return null;
 		ItemStack[] storage = player.getInventory().getStorageContents();
 		HotbarInventory inv = new HotbarInventory();
-		for(int i = 0; i < 9; i++){
-			Icon icon = null;
+		for(int i = 0; i < 9; i++)
 			if(storage[i] != null)
-				icon = new Icon(storage[i]);
-			inv.setIconElement(i, icon);
-		}
+				inv.setIconElement(i, new Icon(storage[i]));
 		return inv;
 	}
 	@Override
@@ -44,7 +41,7 @@ public class HotbarInventory extends AbstractInventory {
 		WrapperPlayServerSetSlot[] array = super.getSlotPacketsArray();
 		for(WrapperPlayServerSetSlot packet : array){
 			packet.setWindowId(-2);
-			packet.sendPacket(receiver);
+			sendPacket(receiver, packet);
 		}
 	}
 }

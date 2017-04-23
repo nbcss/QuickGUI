@@ -15,10 +15,16 @@ public final class Operator {
 	public static void openInventory(InventoryView view, Player player){
 		if(view == null)
 			return;
+		InventoryView before = map.get(player);
+		if(before != null)
+			before.closeInventoryView(player);
 		view.openInventoryView(player);
 		map.put(player, view);
 	}
 	public static void openInventory(AbstractInventory inv, Player player){
+		InventoryView before = map.get(player);
+		if(before != null)
+			before.closeInventoryView(player);
 		BottomInventory bottom = BottomInventory.createFromPlayer(player);
 		HotbarInventory hotbar = HotbarInventory.createFromPlayer(player);
 		InventoryView view = new InventoryView(inv, bottom, hotbar);
@@ -26,6 +32,9 @@ public final class Operator {
 		map.put(player, view);
 	}
 	public static void openInventory(AbstractInventory inv, BottomInventory bottom, Player player){
+		InventoryView before = map.get(player);
+		if(before != null)
+			before.closeInventoryView(player);
 		if(bottom == null)
 			bottom = BottomInventory.createFromPlayer(player);
 		HotbarInventory hotbar = HotbarInventory.createFromPlayer(player);
@@ -34,6 +43,9 @@ public final class Operator {
 		map.put(player, view);
 	}
 	public static void openInventory(AbstractInventory inv, BottomInventory bottom, HotbarInventory hotbar, Player player){
+		InventoryView before = map.get(player);
+		if(before != null)
+			before.closeInventoryView(player);
 		if(bottom == null)
 			bottom = BottomInventory.createFromPlayer(player);
 		if(hotbar == null)

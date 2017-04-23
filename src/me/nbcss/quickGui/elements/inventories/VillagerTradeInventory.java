@@ -11,7 +11,7 @@ import me.nbcss.quickGui.Operator;
 import me.nbcss.quickGui.elements.TradePage;
 import me.nbcss.quickGui.events.InventoryChangeEvent;
 import me.nbcss.quickGui.events.InventoryOpenEvent;
-import me.nbcss.quickGui.events.TradeInventoryPageChangedEvent;
+import me.nbcss.quickGui.events.TradePageChangedEvent;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerCustomPayload;
 
 public class VillagerTradeInventory extends AbstractInventory {
@@ -40,16 +40,18 @@ public class VillagerTradeInventory extends AbstractInventory {
 			return null;
 		return list.get(index);
 	}
-	public void onChangePage(TradeInventoryPageChangedEvent event){
+	public void onChangePage(TradePageChangedEvent event){
 		
 	}
 	@Override
 	public void onOpen(InventoryOpenEvent event){
+		super.onOpen(event);
 		Player receiver = event.getPlayer();
 		updateTrade(receiver);
 	}
 	@Override
 	public void onChange(InventoryChangeEvent event){
+		super.onChange(event);
 		if(event.isReplaced())
 			return;
 		for(Player receiver : event.getChangedInventoryView().getWatchers())
@@ -69,6 +71,6 @@ public class VillagerTradeInventory extends AbstractInventory {
 		for(TradePage trade : list)
 			out.write(trade.toByteArray());
 		packet.setContents(out.toByteArray());
-		packet.sendPacket(receiver);
+		sendPacket(receiver, packet);
 	}
 }

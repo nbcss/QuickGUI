@@ -18,10 +18,8 @@ public class BottomInventory extends AbstractInventory {
 		ItemStack[] storage = player.getInventory().getStorageContents();
 		BottomInventory inv = new BottomInventory();
 		for(int i = 9; i < 36; i++){
-			Icon icon = null;
 			if(storage[i] != null)
-				icon = new Icon(storage[i]);
-			inv.setIconElement(i - 9, icon);
+				inv.setIconElement(i - 9, new Icon(storage[i]));
 		}
 		return inv;
 	}
@@ -45,11 +43,8 @@ public class BottomInventory extends AbstractInventory {
 	}
 	@Override
 	public void update(Player receiver){
-		WrapperPlayServerSetSlot[] array = super.getSlotPacketsArray();
-		for(WrapperPlayServerSetSlot packet : array){
-			packet.setWindowId(-2);
-			packet.setSlot(packet.getSlot() + 9);
-			packet.sendPacket(receiver);
-		}
+		WrapperPlayServerSetSlot[] array = getSlotPacketsArray();
+		for(WrapperPlayServerSetSlot packet : array)
+			sendPacket(receiver, packet);
 	}
 }

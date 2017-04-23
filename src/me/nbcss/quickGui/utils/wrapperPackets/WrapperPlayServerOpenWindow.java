@@ -110,7 +110,7 @@ public class WrapperPlayServerOpenWindow extends AbstractPacket {
 	 * @return The current Entity ID
 	 */
 	public int getEntityID() {
-		return handle.getIntegers().read(0);
+		return handle.getIntegers().read(2);
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class WrapperPlayServerOpenWindow extends AbstractPacket {
 	 * @param value - new value.
 	 */
 	public void setEntityID(int value) {
-		handle.getIntegers().write(0, value);
+		handle.getIntegers().write(2, value);
 	}
 
 	/**

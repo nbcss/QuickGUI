@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 
 import me.nbcss.quickGui.Operator;
 import me.nbcss.quickGui.elements.Icon;
+import me.nbcss.quickGui.events.AnvilTypeTextEvent;
 import me.nbcss.quickGui.events.InventoryChangeEvent;
 import me.nbcss.quickGui.events.InventoryOpenEvent;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerWindowData;
@@ -40,13 +41,18 @@ public class AnvilInventory extends AbstractInventory {
 	public void setLevelCost(int cost) {
 		this.cost = cost;
 	}
+	public void onTypeText(AnvilTypeTextEvent event){
+		
+	}
 	@Override
 	public void onOpen(InventoryOpenEvent event){
+		super.onOpen(event);
 		Player receiver = event.getPlayer();
 		updateCost(receiver);
 	}
 	@Override
 	public void onChange(InventoryChangeEvent event){
+		super.onChange(event);
 		if(event.isReplaced())
 			return;
 		for(Player receiver : event.getChangedInventoryView().getWatchers())
@@ -62,6 +68,6 @@ public class AnvilInventory extends AbstractInventory {
 		packet.setWindowId(Operator.getWindowID());
 		packet.setProperty(0);
 		packet.setValue(cost);
-		packet.sendPacket(receiver);
+		sendPacket(receiver, packet);
 	}
 }

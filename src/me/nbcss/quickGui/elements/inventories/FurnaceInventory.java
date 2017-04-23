@@ -68,15 +68,23 @@ public class FurnaceInventory extends AbstractInventory {
 		this.leftBurnTime = burnTime;
 	}
 	public void setLeftBurnTime(float percent) {
-		this.leftBurnTime = (int) (percent * maxBurnTime / 100);
+		this.leftBurnTime = (int) (percent / 100 * maxBurnTime);
+	}
+	public void resetFuel(){
+		maxBurnTime = 0;
+		leftBurnTime = 0;
+		maxProcessTime = 200;
+		processTime = 0;
 	}
 	@Override
 	public void onOpen(InventoryOpenEvent event){
+		super.onOpen(event);
 		Player receiver = event.getPlayer();
 		updateFuel(receiver);
 	}
 	@Override
 	public void onChange(InventoryChangeEvent event){
+		super.onChange(event);
 		if(event.isReplaced())
 			return;
 		for(Player receiver : event.getChangedInventoryView().getWatchers())
@@ -102,7 +110,7 @@ public class FurnaceInventory extends AbstractInventory {
 				packet.setValue(maxProcessTime);
 			else
 				continue;
-			packet.sendPacket(receiver);
+			sendPacket(receiver, packet);
 		}
 	}
 }
