@@ -8,6 +8,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
 import me.nbcss.quickGui.Operator;
+import me.nbcss.quickGui.elements.Icon;
 import me.nbcss.quickGui.elements.TradePage;
 import me.nbcss.quickGui.events.InventoryChangeEvent;
 import me.nbcss.quickGui.events.InventoryOpenEvent;
@@ -21,6 +22,24 @@ public class VillagerTradeInventory extends AbstractInventory {
 	public VillagerTradeInventory(){
 		super(TYPE, 3, 3, NAME);
 		list = new ArrayList<TradePage>();
+	}
+	public Icon getFirstTradeIcon(){
+		return getIconElement(0);
+	}
+	public void setFirstTradeIcon(Icon icon){
+		setIconElement(0, icon);
+	}
+	public Icon getSecondTradeIcon(){
+		return getIconElement(1);
+	}
+	public void setSecondTradeIcon(Icon icon){
+		setIconElement(1, icon);
+	}
+	public Icon getTradeResultIcon(){
+		return getIconElement(2);
+	}
+	public void setTradeResultIcon(Icon icon){
+		setIconElement(2, icon);
 	}
 	public int getTradeSize(){
 		return list.size();

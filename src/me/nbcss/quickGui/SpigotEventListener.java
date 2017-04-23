@@ -7,6 +7,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import me.nbcss.quickGui.elements.InventoryView;
+
 public final class SpigotEventListener implements Listener {
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e){
@@ -14,7 +16,10 @@ public final class SpigotEventListener implements Listener {
 	}
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e){
-		Operator.closeInventory(e.getPlayer());
+		InventoryView view = Operator.getOpenedInventoryView(e.getPlayer());
+		if(view != null)
+			view.closeInventoryView(e.getPlayer());
+		Operator.removeOpenedInventoryView(e.getPlayer());
 	}
 	@EventHandler
 	public void onPlayerPickup(PlayerPickupItemEvent e){

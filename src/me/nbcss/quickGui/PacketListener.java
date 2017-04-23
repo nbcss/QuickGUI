@@ -26,7 +26,6 @@ import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientCustomPayload;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientEnchantItem;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayClientWindowClick;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerCloseWindow;
-//import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerCustomPayload;
 import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerOpenWindow;
 //import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerWindowData;
 
@@ -73,7 +72,7 @@ public class PacketListener extends PacketAdapter {
 			Player player = event.getPlayer();
 			InventoryView view = Operator.getOpenedInventoryView(player);
 			view.closeInventoryView(player);
-			player.getInventory().setStorageContents(player.getInventory().getStorageContents());
+			player.updateInventory();
 			Operator.resetOpenedInventoryView(player);
 		}else if(event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD){
 			WrapperPlayClientCustomPayload packet = new WrapperPlayClientCustomPayload(event.getPacket());
@@ -126,7 +125,7 @@ public class PacketListener extends PacketAdapter {
 			if(view == null)
 				return;
 			view.closeInventoryView(player);
-			player.getInventory().setStorageContents(player.getInventory().getStorageContents());
+			player.updateInventory();
 			Operator.resetOpenedInventoryView(player);
 		}else if(event.getPacket().getType() == PacketType.Play.Server.OPEN_WINDOW){
 			WrapperPlayServerOpenWindow packet = new WrapperPlayServerOpenWindow(event.getPacket());
@@ -137,7 +136,7 @@ public class PacketListener extends PacketAdapter {
 			if(packet.getWindowID() != Operator.getWindowID())
 				return;
 			view.closeInventoryView(player);
-			player.getInventory().setStorageContents(player.getInventory().getStorageContents());
+			player.updateInventory();
 			Operator.resetOpenedInventoryView(player);
 		}/*else if(event.getPacket().getType() == PacketType.Play.Server.WINDOW_DATA){
 			WrapperPlayServerWindowData packet = new WrapperPlayServerWindowData(event.getPacket());

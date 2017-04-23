@@ -8,7 +8,7 @@ import me.nbcss.quickGui.elements.InventoryView;
 import me.nbcss.quickGui.elements.inventories.AbstractInventory;
 import me.nbcss.quickGui.elements.inventories.BottomInventory;
 import me.nbcss.quickGui.elements.inventories.HotbarInventory;
-import me.nbcss.quickGui.utils.wrapperPackets.WrapperPlayServerCloseWindow;
+
 public final class Operator {
 	private static final int ID = 101;
 	private static HashMap<Player, InventoryView> map = new HashMap<Player, InventoryView>();
@@ -55,9 +55,9 @@ public final class Operator {
 		map.put(player, view);
 	}
 	public static void closeInventory(Player player){
-		WrapperPlayServerCloseWindow packet = new WrapperPlayServerCloseWindow();
-		packet.setWindowId(ID);
-		packet.sendPacket(player);
+		InventoryView view = map.get(player);
+		if(view != null)
+			view.closeInventoryView(player);
 	}
 	public static int getWindowID(){
 		return ID;

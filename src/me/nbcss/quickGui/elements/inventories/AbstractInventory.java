@@ -40,13 +40,13 @@ public abstract class AbstractInventory implements Cloneable {
 			watchers = null;
 	}
 	
-	public final void setIconElement(int slot, Icon icon){
+	public void setIconElement(int slot, Icon icon){
 		if(slot >= items.length || slot < 0)
 			return;
 		items[slot] = icon;
 	}
 	
-	public final Icon getIconElement(int slot){
+	public Icon getIconElement(int slot){
 		if(slot >= items.length || slot < 0)
 			return null;
 		return items[slot];

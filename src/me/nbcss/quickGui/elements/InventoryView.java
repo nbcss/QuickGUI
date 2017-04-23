@@ -161,10 +161,8 @@ public class InventoryView {
 			icon.onInteract(event);
 			updateIcon = event.isUpdate();
 		}
-		if(updateCursor || updateIcon){
+		if(updateCursor || updateIcon)
 			updateContents(player);
-			//updateCursor(player);
-		}
 	}
 	public WrapperPlayServerOpenWindow getOpenWindowPacket(){
 		WrapperPlayServerOpenWindow packet = new WrapperPlayServerOpenWindow();
@@ -191,7 +189,7 @@ public class InventoryView {
 		return packet;
 	}
 	public void updateContents(Player player){
-		if(!Operator.getOpenedInventoryView(player).equals(this))
+		if(!watchers.contains(player))
 			return;
 		updateCursor(player);
 		topInventory.update(player);
@@ -226,7 +224,7 @@ public class InventoryView {
 		return slot;
 	}
 	public void updateCursor(Player player){
-		if(!Operator.getOpenedInventoryView(player).equals(this))
+		if(!watchers.contains(player))
 			return;
 		WrapperPlayServerSetSlot packet = new WrapperPlayServerSetSlot();
 		packet.setWindowId(-1);
@@ -238,7 +236,7 @@ public class InventoryView {
 		packet.sendPacket(player);
 	}
 	public void updateSlot(Player player, int viewSlot){
-		if(!Operator.getOpenedInventoryView(player).equals(this))
+		if(!watchers.contains(player))
 			return;
 		AbstractInventory inv = getLocatedInventory(viewSlot);
 		int slot = getInventorySlot(viewSlot);
