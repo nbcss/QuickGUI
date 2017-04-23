@@ -5,6 +5,15 @@
 
 各个按钮均可以设定自己的点击事件，库存事件尚未添加。
 
+23/4 update
+
+现在新建AbstractInventory时所有空Slot将会默认用空气Icon填充
+
+为部分Inventory添加了事件和额外属性，例如Beacon的Level EnchantmentTable的附魔 Furance的Fuel等。
+
+添加了新的Synachronizable空接口，实现了该接口的AbstractInventory类当update时会对所有打开了这个Inventory的玩家进行update以同步不同玩家的库存显示。
+默认没有Inventory实现该接口，需要用户自建类进行实现。
+
 21/4 update
 
 添加了新的VillagerTradeInventory 现在允许自定义交易面板的物品交易内容显示等。
