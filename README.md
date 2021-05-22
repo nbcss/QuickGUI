@@ -1,29 +1,28 @@
 # QuickGUI
-已更新到Spigot1.11.2
+Updated to Spigot1.11.2
 
-通过拦截/发送库存包来模拟虚拟的库存页面的API，将各种库存类型和按钮封装成了多个易于使用的类。
+The API used packet modification to send dummy inventory page, and packging various type of gui and button into classes which are easy to use. 
 
-各个按钮均可以设定自己的点击事件，库存事件尚未添加。
+All buttons can set their own click event handler. 
 
 23/4 update
 
-现在新建AbstractInventory时所有空Slot将会默认用空气Icon填充
+All new empty slots in AbstractInventory will use AIR icon now. 
 
-为部分Inventory添加了事件和额外属性，例如Beacon的Level EnchantmentTable的附魔 Furance的Fuel等。
+Add new events and attributes for some Inventory classes, such as Beacon enchanment and Fuel of Furance. 
 
-添加了新的Synachronizable空接口，实现了该接口的AbstractInventory类当update时会对所有打开了这个Inventory的玩家进行update以同步不同玩家的库存显示。
-默认没有Inventory实现该接口，需要用户自建类进行实现。
+Added new Synachronizable interface; all subclass of AbstractInventory which implemented this interface will update all opener of the GUI for different players, so the contents can be synachronized across different players when update. All defult implementations of Inventory did not implement this interface, user need to create their own subclass if they want to use the feature. 
 
 21/4 update
 
-添加了新的VillagerTradeInventory 现在允许自定义交易面板的物品交易内容显示等。
+Added new VillagerTradeInventory, which allow to custom the trade page of villager. 
 
-为部分Inventory添加了一些额外数据，例如AnvilInventory现在有cost显示可更改(维修需求等级/Repair Level)
+Add new attributes for some Inventory classes, such as AnvilInventory now have cost attribute which can modify. 
 
 19/4 update
 
-InventoryView对象现在允许重设其topInventory,bottomInventory与hotbarInventory来实现界面切换。
+InventoryView objects can now change its topInventory,bottomInventory and hotbarInventory for change its page. 
 
-InventoryView现拥有自己的Title，默认title将使用topInventory的title。
+InventoryView now have its own Title; the defualt title will use the title of its topInventory. 
 
-InventoryView添加了watchers观测者列表来实现多人使用同界面。
+InventoryView added 'watchers' to allow multiple users to access same GUI. 
